@@ -88,7 +88,9 @@ for f in $PAGES; do
   ' "$f"
 
   if [ -n "$ACTIVE" ]; then
-    ACTIVE="$ACTIVE" perl -0777 -i -pe 's/data-nav="\Q$ENV{ACTIVE}\E"/data-nav="$ENV{ACTIVE}" data-active="1"/' "$f"
+    # /g matters: the same data-nav key now appears in the header nav and again
+    # in the vertical rail, and both need marking.
+    ACTIVE="$ACTIVE" perl -0777 -i -pe 's/data-nav="\Q$ENV{ACTIVE}\E"/data-nav="$ENV{ACTIVE}" data-active="1"/g' "$f"
   fi
 
   echo "  built $f  (base: '${BASE:-<relative>}')"

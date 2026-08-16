@@ -23,3 +23,20 @@
     <div class="foot-bottom"><span class="footer-copyright">Copyright &copy; 2026 African Hair Care Ltd</span></div>
   </div>
 </footer>
+
+<!-- Floating consultation offer. Sits bottom-LEFT because the WhatsApp button
+     already owns the bottom-right corner; on desktop it clears the rail.
+     Collapsed state is remembered, so it can't nag on every page. -->
+<aside class="consult" id="consult" aria-label="Free consultation offer">
+  <button class="consult-pill" type="button" data-action="consult-expand" aria-expanded="true" aria-controls="consult-body">
+    <span class="consult-spark" aria-hidden="true">&#10022;</span>
+    <span>Free Consultation</span>
+  </button>
+
+  <div class="consult-body" id="consult-body">
+    <button class="consult-collapse" type="button" data-action="consult-collapse" aria-label="Collapse this offer">&#8211;</button>
+    <h3>Free Hair Consultation</h3>
+    <p>A free 15-minute texture and style assessment before any appointment — no obligation to book on the day.</p>
+    <button class="btn btn-gold btn-sm consult-cta" type="button" data-book="">Book my consultation</button>
+  </div>
+</aside>

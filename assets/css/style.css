@@ -59,6 +59,15 @@
   --space-block:    1.5rem;  /* paragraph → next element */
   --space-section:  clamp(64px, 9vw, 120px);
 
+  /* Fixed vertical rail. The width is consumed by the body offset below, so
+     changing it here moves the whole layout. */
+  --rail-width: 84px;
+  /* Layer stack, declared in one place so nothing guesses:
+     header 100 · drawer 150 · rail 180 · WhatsApp 200 · consult 210 · modal 300.
+     The rail deliberately sits below the modal — a 999 rail would cover it. */
+  --z-rail: 180;
+  --z-consult: 210;
+
   /* ---- Theme-dependent surfaces ----
      Anything that would otherwise hardcode a dark value lives here, so the
      light theme flips one token instead of re-declaring the whole rule. */
@@ -895,3 +904,170 @@ section.block--flush-top{padding-top:0}
   .form-embed iframe{height:3400px}
 }
 @media(max-width:420px){.form-embed iframe{height:3900px}}
+
+/* =========================================================================
+   PROMOTIONAL & UTILITY CHROME
+   Fixed vertical rail, announcement ticker, floating consultation offer.
+   All three read from the theme tokens, so they follow Dark and Light without
+   a single hardcoded colour.
+   ========================================================================= */
+
+/* ---------- Announcement ticker ----------
+   Sits above the sticky header in normal flow, so it scrolls away rather than
+   permanently eating vertical space. */
+.ticker{
+  width:100%;overflow:hidden;white-space:nowrap;
+  background:var(--panel-grad),var(--color-canvas-alt);
+  border-bottom:1px solid var(--color-border);
+  padding:8px 0;
+}
+.ticker-track{
+  display:inline-block;white-space:nowrap;
+  will-change:transform;
+  animation:ticker-scroll 45s linear infinite;
+}
+/* Pause for anyone reading or reaching for a link — hover and keyboard alike. */
+.ticker:hover .ticker-track,
+.ticker:focus-within .ticker-track{animation-play-state:paused}
+.ticker-item{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:0 26px;
+  font-size:.74rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--color-ink-secondary);
+}
+.ticker-item b{color:var(--color-ink-primary);font-weight:600}
+.ticker-item::before{
+  content:"";flex:none;width:4px;height:4px;border-radius:50%;
+  background:var(--color-gold);
+}
+.ticker-item a{color:var(--color-gold);text-decoration:underline;text-underline-offset:3px}
+/* Track holds the list twice, so -50% lands exactly on the seam. */
+@keyframes ticker-scroll{
+  from{transform:translateX(0)}
+  to{transform:translateX(-50%)}
+}
+
+/* ---------- Fixed vertical rail ---------- */
+.vrail{
+  position:fixed;top:0;left:0;height:100vh;width:var(--rail-width);
+  display:none;                       /* switched on at >=1024px */
+  flex-direction:column;align-items:center;justify-content:space-between;
+  padding:24px 0 20px;
+  background:var(--color-surface);
+  backdrop-filter:blur(16px) saturate(140%);
+  -webkit-backdrop-filter:blur(16px) saturate(140%);
+  border-right:1px solid var(--color-border);
+  z-index:var(--z-rail);
+}
+.vrail-mark{
+  font-family:var(--font-display);font-size:.82rem;font-weight:600;
+  letter-spacing:.18em;color:var(--color-gold);
+  writing-mode:horizontal-tb;transition:var(--transition-fast)
+}
+.vrail-mark:hover{color:var(--color-gold-bright)}
+
+/* Rotated 180deg on top of vertical-rl so the text reads bottom-to-top.
+   row-reverse is the catch: the rotation flips the stacking order as well as
+   the glyphs, so without it the first link lands at the bottom of the rail. */
+.vrail-nav{
+  display:flex;flex-direction:row-reverse;gap:30px;
+  writing-mode:vertical-rl;transform:rotate(180deg);
+}
+.vrail-nav a{
+  font-size:.72rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--color-ink-secondary);
+  padding:2px 0;
+  transition:var(--transition-fast);
+}
+.vrail-nav a:hover{color:var(--color-gold)}
+/* The active page gets the gold plus a small tick on the rail edge. */
+.vrail-nav a[data-active]{color:var(--color-ink-primary);position:relative}
+.vrail-nav a[data-active]::after{
+  content:"";position:absolute;inset-inline-end:-11px;inset-block:0;
+  width:2px;background:var(--color-gold);border-radius:2px;
+}
+.vrail-nav a:focus-visible,.vrail-mark:focus-visible{outline:2px solid var(--color-gold);outline-offset:4px;border-radius:2px}
+
+.vrail-actions{display:flex;flex-direction:column;align-items:center;gap:6px}
+.vrail-action{
+  width:38px;height:38px;display:grid;place-items:center;
+  border-radius:50%;border:1px solid transparent;background:transparent;
+  color:var(--color-ink-secondary);cursor:pointer;
+  transition:var(--transition-fast);
+}
+.vrail-action:hover{color:var(--color-gold);border-color:var(--color-border);background:var(--tint-accent)}
+.vrail-action:focus-visible{outline:2px solid var(--color-gold);outline-offset:2px}
+.vrail-action--cta{color:var(--color-gold);border-color:var(--color-border)}
+.vrail-action--cta:hover{background:var(--color-action);color:var(--color-on-action);border-color:var(--color-action)}
+
+/* ---------- Floating consultation offer ---------- */
+.consult{
+  position:fixed;bottom:24px;left:24px;z-index:var(--z-consult);
+  width:min(320px, calc(100vw - 48px));
+  background:var(--color-surface);
+  backdrop-filter:blur(16px) saturate(140%);
+  -webkit-backdrop-filter:blur(16px) saturate(140%);
+  border:1px solid var(--color-border-hover);
+  border-radius:var(--radius-lg);
+  padding:22px;
+  box-shadow:var(--shadow-hover);
+  transition:width .3s cubic-bezier(.16,1,.3,1),padding .3s cubic-bezier(.16,1,.3,1),border-radius .3s cubic-bezier(.16,1,.3,1);
+  animation:consult-glow 3.2s ease-in-out infinite alternate;
+}
+@keyframes consult-glow{
+  from{box-shadow:var(--shadow-hover), 0 0 0 0 var(--tint-accent)}
+  to{box-shadow:var(--shadow-hover), 0 0 26px 3px var(--tint-accent-strong)}
+}
+.consult h3{font-size:1.25rem;margin-bottom:.55rem;padding-right:24px}
+.consult p{font-size:.86rem;line-height:1.65;color:var(--color-ink-secondary);margin-bottom:1.1rem}
+.consult-cta{width:100%}
+.consult-collapse{
+  position:absolute;top:14px;right:14px;
+  width:30px;height:30px;display:grid;place-items:center;
+  background:transparent;border:1px solid var(--color-border);border-radius:50%;
+  color:var(--color-ink-secondary);font-size:1rem;line-height:1;cursor:pointer;
+  transition:var(--transition-fast);
+}
+.consult-collapse:hover{color:var(--color-ink-primary);border-color:var(--color-border-hover)}
+.consult-collapse:focus-visible,.consult-pill:focus-visible{outline:2px solid var(--color-gold);outline-offset:2px}
+
+/* The pill is the collapsed face; only one of the two is ever shown. */
+.consult-pill{
+  display:none;align-items:center;gap:9px;
+  background:transparent;border:none;cursor:pointer;
+  font-family:inherit;font-size:.76rem;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--color-gold);
+}
+.consult-spark{font-size:.9rem;line-height:1}
+.consult.is-collapsed{width:auto;padding:11px 20px;border-radius:100px;cursor:pointer}
+.consult.is-collapsed .consult-body{display:none}
+.consult.is-collapsed .consult-pill{display:inline-flex}
+
+/* ---------- Responsive ----------
+   The rail is a desktop pattern; below 1024 everything falls back to the
+   sticky header and drawer that were already here. */
+@media(min-width:1024px){
+  .vrail{display:flex}
+  /* Offsetting body rather than main means the header, ticker and footer all
+     clear the rail too — box-sizing:border-box keeps this from overflowing. */
+  body{padding-left:var(--rail-width)}
+  /* Fixed elements are positioned against the viewport, not the padded body,
+     so they need the offset applied by hand. */
+  .consult{left:calc(var(--rail-width) + 24px)}
+}
+@media(max-width:1023px){
+  .vrail{display:none}
+  body{padding-left:0}
+}
+@media(max-width:640px){
+  /* Clear the WhatsApp button, which owns the opposite corner. */
+  .consult{left:16px;right:16px;bottom:16px;width:auto}
+  .consult.is-collapsed{right:auto}
+  .consult:not(.is-collapsed){bottom:84px}
+}
+
+/* Decoration must not move for anyone who has asked it not to. */
+@media(prefers-reduced-motion:reduce){
+  .ticker-track{animation:none;transform:none}
+  .consult{animation:none}
+}

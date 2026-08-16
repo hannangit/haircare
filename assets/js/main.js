@@ -152,6 +152,51 @@ function initHours() {
   targets.forEach(el => { el.innerHTML = rows; });
 }
 
+/* ---------- Announcement ticker ----------
+   The track holds the message list twice: the keyframe translates -50%, which
+   lands exactly on the start of the second copy, so the loop has no visible
+   seam. The duplicate is aria-hidden so it isn't read out twice. */
+function initTicker() {
+  const track = document.getElementById('ticker-track');
+  if (!track || typeof TICKER_MESSAGES === 'undefined') return;
+
+  const today = OPENING_HOURS[(new Date().getDay() + 6) % 7];
+  const items = [
+    today.hours === 'Closed'
+      ? '<b>Closed today</b> — book online any time'
+      : '<b>Open today</b> ' + today.hours,
+    ...TICKER_MESSAGES
+  ];
+  const group = items.map(m => '<span class="ticker-item">' + m + '</span>').join('');
+
+  track.innerHTML = group + '<span aria-hidden="true">' + group + '</span>';
+  document.getElementById('ticker').hidden = false;
+
+  // A short list on a wide screen would leave a gap before the wrap, so pace the
+  // animation by content width rather than a fixed duration.
+  const width = track.scrollWidth / 2;
+  if (width) track.style.animationDuration = Math.max(30, Math.round(width / 45)) + 's';
+}
+
+/* ---------- Floating consultation offer ----------
+   Collapsed state is remembered, so the card doesn't re-open on every page. */
+function setConsult(collapsed) {
+  const el = document.getElementById('consult');
+  if (!el) return;
+  el.classList.toggle('is-collapsed', collapsed);
+  const pill = el.querySelector('.consult-pill');
+  if (pill) pill.setAttribute('aria-expanded', String(!collapsed));
+  try { localStorage.setItem('ahc-consult', collapsed ? 'collapsed' : 'open'); } catch (e) { /* private mode */ }
+}
+function initConsult() {
+  const el = document.getElementById('consult');
+  if (!el) return;
+  let stored = null;
+  try { stored = localStorage.getItem('ahc-consult'); } catch (e) { /* private mode */ }
+  // Default to collapsed: an offer that covers content unasked is an annoyance.
+  setConsult(stored !== 'open');
+}
+
 /* ---------- ServiceCard — the single card component used everywhere ---------- */
 function ServiceCard(s) {
   const href = rootPath('services/' + s.id + '.html');
@@ -489,6 +534,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initIcons();
   initTabs();
   initHours();
+  initTicker();
+  initConsult();
   initCategories();
   initSearch();
   initServicePicker();
@@ -503,6 +550,8 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'close-menu':    setMenu(false); break;
       case 'clear-filters': clearFilters(); break;
       case 'open-stylist':  openStylist(); break;
+      case 'consult-collapse': setConsult(true); break;
+      case 'consult-expand':   setConsult(false); break;
     }
   });
 
@@ -537,6 +586,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const manual = document.getElementById('booking-manual');
     if (manual) manual.hidden = true;
   }
+
+  // Social links appear only once a real handle is configured — an icon that
+  // links to "#" is worse than no icon.
+  document.querySelectorAll('[data-social]').forEach(el => {
+    const url = CONFIG[el.dataset.social];
+    if (url) { el.href = url; el.hidden = false; }
+  });
 
   // CONFIG-driven links (each already has a working WhatsApp fallback href)
   document.querySelectorAll('[data-booking-link]').forEach(el => { if (CONFIG.bookingUrl) el.href = CONFIG.bookingUrl; });
