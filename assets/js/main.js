@@ -27,6 +27,27 @@ function initIntro() {
   }, hold);
 }
 
+/* ---------- Colour theme (Dark / Light) ----------
+   Dark is the brand default and lives in :root, so only "light" ever sets the
+   attribute. A script in each page head applies the saved choice before first
+   paint, otherwise a light-theme visitor gets a dark flash on every load. */
+function applyTheme(name) {
+  const root = document.documentElement;
+  if (name === 'light') root.dataset.theme = 'light';
+  else delete root.dataset.theme;
+  try { localStorage.setItem('ahc-theme', name); } catch (e) { /* private mode */ }
+  document.querySelectorAll('[data-theme-set]').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.themeSet === name));
+  });
+}
+function initTheme() {
+  const current = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+  document.querySelectorAll('[data-theme-set]').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.themeSet === current));
+    b.addEventListener('click', () => applyTheme(b.dataset.themeSet));
+  });
+}
+
 /* ---------- Tabs ----------
    Markup: .tabs > .tablist > button[data-tab="id"] , then .tab-panel[data-panel="id"].
    Honours a #hash matching a tab key so other pages can deep-link into a panel. */
@@ -462,6 +483,7 @@ function showSuccess(isStylist) {
 /* ---------- Page init ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   initIntro();
+  initTheme();
   initNav();
   initMobileMenu();
   initIcons();

@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
+<script>try{if(localStorage.getItem("ahc-theme")==="light")document.documentElement.dataset.theme="light";}catch(e){}</script>
 </head>
 <body>
 
@@ -61,6 +62,10 @@
     </nav>
 
     <div class="nav-cta">
+      <div class="theme-switch" role="group" aria-label="Colour theme">
+        <button type="button" class="theme-pill" data-theme-set="dark" aria-pressed="true">Dark</button>
+        <button type="button" class="theme-pill" data-theme-set="light" aria-pressed="false">Light</button>
+      </div>
       <button class="btn btn-gold btn-sm nav-book" type="button" data-book="">Book</button>
       <button type="button" class="burger" data-action="toggle-menu" aria-label="Menu" aria-expanded="false" aria-controls="mmenu"><span></span><span></span><span></span></button>
     </div>
@@ -83,6 +88,11 @@
     <a href="stylists.html#apply">Apply to Join</a>
     <span class="mm-group">More</span>
     <a href="index.html#contact">Contact</a>
+    <span class="mm-group">Appearance</span>
+    <div class="theme-switch" role="group" aria-label="Colour theme">
+      <button type="button" class="theme-pill" data-theme-set="dark" aria-pressed="true">Dark</button>
+      <button type="button" class="theme-pill" data-theme-set="light" aria-pressed="false">Light</button>
+    </div>
     <button class="btn btn-gold mm-book" type="button" data-book="">Book an appointment</button>
   </div>
 </header>
