@@ -8,7 +8,7 @@ function renderServicePage(id) {
   }
 
   setCategory(categorySlug(s.category));
-  document.title = s.title + ' | Amara African Hair & Beauty, Milton Keynes';
+  document.title = s.title + ' | African Hair Care, Milton Keynes';
   document.getElementById('bc-title').textContent = s.title;
 
   /* ---- Gallery ---- */

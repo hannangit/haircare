@@ -1,4 +1,4 @@
-# Amara African Hair &amp; Beauty — website
+# African Hair Care — website
 
 Static site (no framework, no npm) for an African hair care and beauty salon in
 Central Milton Keynes. Service menu with prices, a booking flow, an aftercare
@@ -24,6 +24,37 @@ Then open <http://localhost:8752>.
 | Header / nav, footer, booking modal | `partials/` — then run `bash build.sh` |
 | Colours, spacing, components | `assets/css/style.css` |
 | Icons | `assets/js/icons.js` |
+
+## Design
+
+One dark theme, no light mode and no theme switcher. The whole palette lives in
+the `:root` block at the top of `style.css`:
+
+- **Ground** — `--color-ink-900/800/700` — near-black with a purple cast.
+- **Gold** — `--color-gold` and friends — the single accent. Reserved for the
+  wordmark, prices, the primary CTA and small caps labels. Everything else is
+  ink, a hairline border, or nothing.
+- **Type** — Cormorant Garamond for headings and quotes, Inter for everything
+  functional, JetBrains Mono for figures.
+- **Rhythm** — `--space-heading`, `--space-block` and `--space-section` drive the
+  vertical spacing. Prefer these over one-off margins, so components can't drift
+  apart again.
+
+Each service category carries its own accent (`body[data-category="…"]`), used
+for small labels and the artwork tint. The ground and the gold CTAs never move,
+so the site still reads as one brand.
+
+### Swapping in real photography
+
+Two places are built to be replaced with real images:
+
+1. **Hero** — the `.hero-veil` block in `index.html` is a decorative SVG. Replace
+   the whole `<div class="hero-veil">…</div>` with an `<img>` or a CSS
+   background on `.ghero`.
+2. **Service cards** — `placeholderImage()` in `services-data.js` generates the
+   tinted artwork. Set `images: ['/path/to/photo.jpg', …]` on a service to
+   override it; the first image is the card thumbnail, the next two fill the
+   gallery on the service page.
 
 ### Shared header / footer / modal
 
@@ -74,10 +105,9 @@ with real photograph URLs when you have them.
 
 This site was built as a working shell. None of the following is real:
 
-- [ ] **Business name and branding** — "Amara African Hair &amp; Beauty" is invented
 - [ ] **Address** — Unit 4, Silbury Arcade, Central Milton Keynes, MK9 3AG
 - [ ] **Phone and WhatsApp** — uses Ofcom's reserved 07700 900xxx fictional range
-- [ ] **Email addresses** — `@amarahairbeauty.co.uk` is not a registered domain
+- [ ] **Email addresses** — `@africanhaircare.co.uk` is not a registered domain
 - [ ] **Opening hours** in `config.js`
 - [ ] **All prices and durations** in `services-data.js`
 - [ ] **Stylist names, roles and contact details** in `team.html`

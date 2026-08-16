@@ -25,12 +25,14 @@ const CATEGORIES = [
   { name: 'Beauty',        slug: 'beauty',       blurb: 'Lashes, brows, threading, waxing and makeup.' }
 ];
 
+/* Deep, desaturated grounds so the generated artwork sits inside the dark
+   palette rather than fighting it. The gold overlay is shared. */
 const CATEGORY_ART = {
-  'braids':       ['#7A2F52', '#C4633C'],
-  'twists-locs':  ['#4A2A1E', '#A9713C'],
-  'weaves-wigs':  ['#4A1E3F', '#A34A78'],
-  'natural-hair': ['#1F4034', '#3E7A55'],
-  'beauty':       ['#5A1B33', '#C24A6B']
+  'braids':       ['#2A1424', '#5E3A2A'],
+  'twists-locs':  ['#241628', '#544026'],
+  'weaves-wigs':  ['#28122C', '#553049'],
+  'natural-hair': ['#152119', '#2F5340'],
+  'beauty':       ['#2B1224', '#5E2F45']
 };
 
 function categorySlug(name) {
@@ -52,17 +54,27 @@ function placeholderImage(categoryName, label, variant) {
         '<linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
           '<stop offset="0" stop-color="' + from + '"/><stop offset="1" stop-color="' + to + '"/>' +
         '</linearGradient>' +
-        '<pattern id="p" width="72" height="48" patternUnits="userSpaceOnUse" patternTransform="rotate(' + (24 + v * 18) + ')">' +
-          '<path d="M0 24 Q18 2 36 24 T72 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4"/>' +
-        '</pattern>' +
+        '<linearGradient id="s" x1="0" y1="0" x2="1" y2="0">' +
+          '<stop offset="0" stop-color="#F0D49A" stop-opacity="0"/>' +
+          '<stop offset=".5" stop-color="#D9AE62" stop-opacity=".55"/>' +
+          '<stop offset="1" stop-color="#B98A3C" stop-opacity="0"/>' +
+        '</linearGradient>' +
+        '<radialGradient id="glow" cx="50%" cy="50%">' +
+          '<stop offset="0" stop-color="#D9AE62" stop-opacity=".26"/>' +
+          '<stop offset="1" stop-color="#D9AE62" stop-opacity="0"/>' +
+        '</radialGradient>' +
       '</defs>' +
       '<rect width="1200" height="800" fill="url(#g)"/>' +
-      '<rect width="1200" height="800" fill="url(#p)"/>' +
-      '<circle cx="' + (980 - v * 120) + '" cy="' + (170 + v * 90) + '" r="220" fill="rgba(217,164,65,0.18)"/>' +
-      '<text x="600" y="415" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" ' +
-        'font-size="52" font-weight="700" fill="rgba(255,255,255,0.94)">' + escapeXml(label) + '</text>' +
-      '<text x="600" y="465" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" ' +
-        'font-size="22" fill="rgba(255,255,255,0.62)">Salon photography coming soon</text>' +
+      '<circle cx="' + (940 - v * 150) + '" cy="' + (200 + v * 110) + '" r="330" fill="url(#glow)"/>' +
+      '<g fill="none" stroke="url(#s)" stroke-linecap="round">' +
+        '<path d="M-60 ' + (250 + v * 40) + ' C 240 120, 420 400, 700 250 S 1120 90, 1300 210" stroke-width="3"/>' +
+        '<path d="M-60 ' + (330 + v * 40) + ' C 220 200, 460 470, 700 330 S 1140 170, 1300 300" stroke-width="2"/>' +
+        '<path d="M-60 ' + (560 + v * 40) + ' C 260 430, 420 700, 720 570 S 1160 430, 1300 550" stroke-width="3"/>' +
+      '</g>' +
+      '<text x="600" y="410" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" ' +
+        'font-size="62" font-weight="600" fill="#F3EBE3">' + escapeXml(label) + '</text>' +
+      '<text x="600" y="462" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" ' +
+        'font-size="20" letter-spacing="4" fill="#D9AE62" fill-opacity=".75">PHOTOGRAPHY COMING SOON</text>' +
     '</svg>';
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 }
@@ -84,7 +96,7 @@ function service(id, name, category, overrides) {
       placeholderImage(category, name, 1),
       placeholderImage(category, name, 2)
     ],
-    alt: name + ' at Amara African Hair & Beauty'
+    alt: name + ' at African Hair Care'
   }, overrides || {});
 }
 

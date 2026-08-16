@@ -21,7 +21,7 @@ const CONFIG = {
   whatsapp: 'https://wa.me/447700900123',
   phone: '+44 7700 900123',
   phoneHref: 'tel:+447700900123',
-  email: 'hello@amarahairbeauty.co.uk',
+  email: 'hello@africanhaircare.co.uk',
 
   address: 'Unit 4, Silbury Arcade, Central Milton Keynes, MK9 3AG',
   mapsQuery: 'Silbury Arcade, Central Milton Keynes, MK9 3AG'

@@ -27,26 +27,6 @@ function initIntro() {
   }, hold);
 }
 
-/* ---------- Colour theme (Day / Night) ----------
-   The default is Day (the brand palette). A page-head script restores the saved
-   choice before first paint; this only handles switching and button state. */
-function applyTheme(name) {
-  const root = document.documentElement;
-  if (name === 'night') root.dataset.theme = 'night';
-  else delete root.dataset.theme;
-  try { localStorage.setItem('amara-theme', name); } catch (e) { /* private mode */ }
-  document.querySelectorAll('[data-theme-set]').forEach(b => {
-    b.setAttribute('aria-pressed', String(b.dataset.themeSet === name));
-  });
-}
-function initTheme() {
-  const current = document.documentElement.dataset.theme === 'night' ? 'night' : 'day';
-  document.querySelectorAll('[data-theme-set]').forEach(b => {
-    b.setAttribute('aria-pressed', String(b.dataset.themeSet === current));
-    b.addEventListener('click', () => applyTheme(b.dataset.themeSet));
-  });
-}
-
 /* ---------- Tabs ----------
    Markup: .tabs > .tablist > button[data-tab="id"] , then .tab-panel[data-panel="id"].
    Honours a #hash matching a tab key so other pages can deep-link into a panel. */
@@ -184,8 +164,8 @@ function ServiceCard(s) {
         ${badges.map(b => `<li${b.warn ? ' class="warn"' : ''}>${b.label}</li>`).join('')}
       </ul>` : ''}
       <div class="actions">
-        <a class="btn btn-black" href="${href}">View service</a>
-        <button class="btn btn-outline" type="button" data-book="${s.id}">Book</button>
+        <a class="btn btn-outline btn-sm" href="${href}">Details</a>
+        <button class="btn btn-gold btn-sm" type="button" data-book="${s.id}">Book</button>
       </div>
     </div>
   </article>`;
@@ -482,7 +462,6 @@ function showSuccess(isStylist) {
 /* ---------- Page init ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   initIntro();
-  initTheme();
   initNav();
   initMobileMenu();
   initIcons();
