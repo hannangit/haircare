@@ -322,7 +322,7 @@ header{position:sticky;top:0;z-index:100;background:var(--header-bg);backdrop-fi
 /* ---------- Glass panels ----------
    One rule for every raised surface, so panels stay consistent and the blur is
    declared once rather than per component. */
-.prop,.res-card,.searchbar,.amen,.team-card,.quote,.ll-stat,.rg-item,
+.prop,.res-card,.searchbar,.amen,.team-card,.ll-stat,.rg-item,
 .guide-section,.spec-table,.pathway,.sidebar-card,.docs-panel,.nav-sub,
 .modal,.hub-feature,.cat-tile,.hours,.redress-box,.n-item,.noresults,.form-embed{
   background:var(--color-surface);
@@ -421,11 +421,6 @@ section.block{padding:var(--space-section) 0}
 .res-banner h3{color:var(--color-ink-primary);font-size:1.7rem}
 .res-banner p{color:var(--color-ink-secondary);font-size:.95rem;margin-top:.6rem;max-width:62ch}
 
-.quotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px}
-.quote{border:1px solid var(--color-border);border-radius:var(--radius-md);padding:32px}
-.quote .stars{color:var(--color-gold);letter-spacing:3px;margin-bottom:1.1rem}
-.quote p{font-family:var(--font-display);font-size:1.18rem;line-height:1.6;font-style:italic;color:var(--color-ink-primary);margin-bottom:1.4rem}
-.quote .who{font-size:.78rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--color-gold)}
 
 .subhero{position:relative;overflow:hidden;background:var(--subhero-bg);
   border-bottom:1px solid var(--color-border);
@@ -794,7 +789,7 @@ section.block--flush-top{padding-top:0}
   .nav{height:70px}
   .searchbar{grid-template-columns:1fr 1fr;gap:10px}
   .searchbar .btn{grid-column:1/-1}
-  .prop-grid,.res-grid,.quotes,.rg-grid,.steps,.docs-panel,.ll-stats,
+  .prop-grid,.res-grid,.rg-grid,.steps,.docs-panel,.ll-stats,
   .res-banner,.form-row,.detail-grid,.team-grid{grid-template-columns:1fr}
   .amen-grid,.foot-grid{grid-template-columns:1fr 1fr}
   .gallery{grid-template-columns:1fr}
@@ -818,7 +813,7 @@ section.block--flush-top{padding-top:0}
   .foot-grid{grid-template-columns:1fr;gap:34px}
   .amen-grid,.searchbar,.spec-grid,
   .prop .body .actions,.nearby-list,.amenity-list,.team-grid{grid-template-columns:1fr}
-  .prop .body,.res-card,.quote,.pathway{padding:24px}
+  .prop .body,.res-card,.pathway{padding:24px}
   .hub-feature,.interest-cta,.res-banner,.detail-cta-band,.rg-panel{padding:28px 24px}
   .guide-section{padding:26px 22px}
   .steps-inhouse .step-row{padding:22px}
@@ -1041,3 +1036,10 @@ section.block--flush-top{padding-top:0}
   .ticker-track{animation:none;transform:none}
   .consult{animation:none}
 }
+
+/* ---------- Embedded reviews ----------
+   The widget injects its own markup and styling, so this only reserves space
+   and keeps it from butting up against the section above. min-height stops the
+   section collapsing while the third-party script is still loading. */
+.reviews-embed{min-height:220px}
+.reviews-embed iframe{max-width:100%;border:0}
