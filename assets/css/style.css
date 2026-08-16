@@ -59,13 +59,10 @@
   --space-block:    1.5rem;  /* paragraph → next element */
   --space-section:  clamp(64px, 9vw, 120px);
 
-  /* Fixed vertical rail. The width is consumed by the body offset below, so
-     changing it here moves the whole layout. */
-  --rail-width: 84px;
   /* Layer stack, declared in one place so nothing guesses:
-     header 100 · drawer 150 · rail 180 · WhatsApp 200 · consult 210 · modal 300.
-     The rail deliberately sits below the modal — a 999 rail would cover it. */
-  --z-rail: 180;
+     header 100 · drawer 150 · social 180 · WhatsApp 200 · consult 210 · modal 300.
+     These deliberately sit below the modal — a 999 float would cover it. */
+  --z-social: 180;
   --z-consult: 210;
 
   /* ---- Theme-dependent surfaces ----
@@ -907,7 +904,7 @@ section.block--flush-top{padding-top:0}
 
 /* =========================================================================
    PROMOTIONAL & UTILITY CHROME
-   Fixed vertical rail, announcement ticker, floating consultation offer.
+   Announcement ticker, floating contact icons, floating consultation offer.
    All three read from the theme tokens, so they follow Dark and Light without
    a single hardcoded colour.
    ========================================================================= */
@@ -947,58 +944,35 @@ section.block--flush-top{padding-top:0}
   to{transform:translateX(-50%)}
 }
 
-/* ---------- Fixed vertical rail ---------- */
-.vrail{
-  position:fixed;top:0;left:0;height:100vh;width:var(--rail-width);
-  display:none;                       /* switched on at >=1024px */
-  flex-direction:column;align-items:center;justify-content:space-between;
-  padding:24px 0 20px;
+/* ---------- Floating contact icons ----------
+   No container: the column itself is transparent and each icon is its own glass
+   pill floating over the page, so the hero background runs to the viewport edge.
+   Navigation text lives only in the header — nothing is duplicated here. */
+.floating-social-bar{
+  position:fixed;left:20px;top:50%;transform:translateY(-50%);
+  z-index:var(--z-social);
+  display:flex;flex-direction:column;gap:14px;
+  background:transparent;border:none;box-shadow:none;
+}
+.social-icon{
+  width:44px;height:44px;border-radius:50%;
+  display:grid;place-items:center;
   background:var(--color-surface);
-  backdrop-filter:blur(16px) saturate(140%);
-  -webkit-backdrop-filter:blur(16px) saturate(140%);
-  border-right:1px solid var(--color-border);
-  z-index:var(--z-rail);
+  backdrop-filter:blur(10px) saturate(140%);
+  -webkit-backdrop-filter:blur(10px) saturate(140%);
+  border:1px solid var(--color-border-hover);
+  color:var(--color-ink-primary);
+  box-shadow:var(--shadow-subtle);
+  cursor:pointer;
+  transition:transform .2s ease,background .2s ease,border-color .2s ease,color .2s ease;
 }
-.vrail-mark{
-  font-family:var(--font-display);font-size:.82rem;font-weight:600;
-  letter-spacing:.18em;color:var(--color-gold);
-  writing-mode:horizontal-tb;transition:var(--transition-fast)
+.social-icon:hover{
+  transform:scale(1.1);
+  background:var(--tint-accent-strong);
+  border-color:var(--color-gold);
+  color:var(--color-gold);
 }
-.vrail-mark:hover{color:var(--color-gold-bright)}
-
-/* Rotated 180deg on top of vertical-rl so the text reads bottom-to-top.
-   row-reverse is the catch: the rotation flips the stacking order as well as
-   the glyphs, so without it the first link lands at the bottom of the rail. */
-.vrail-nav{
-  display:flex;flex-direction:row-reverse;gap:30px;
-  writing-mode:vertical-rl;transform:rotate(180deg);
-}
-.vrail-nav a{
-  font-size:.72rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;
-  color:var(--color-ink-secondary);
-  padding:2px 0;
-  transition:var(--transition-fast);
-}
-.vrail-nav a:hover{color:var(--color-gold)}
-/* The active page gets the gold plus a small tick on the rail edge. */
-.vrail-nav a[data-active]{color:var(--color-ink-primary);position:relative}
-.vrail-nav a[data-active]::after{
-  content:"";position:absolute;inset-inline-end:-11px;inset-block:0;
-  width:2px;background:var(--color-gold);border-radius:2px;
-}
-.vrail-nav a:focus-visible,.vrail-mark:focus-visible{outline:2px solid var(--color-gold);outline-offset:4px;border-radius:2px}
-
-.vrail-actions{display:flex;flex-direction:column;align-items:center;gap:6px}
-.vrail-action{
-  width:38px;height:38px;display:grid;place-items:center;
-  border-radius:50%;border:1px solid transparent;background:transparent;
-  color:var(--color-ink-secondary);cursor:pointer;
-  transition:var(--transition-fast);
-}
-.vrail-action:hover{color:var(--color-gold);border-color:var(--color-border);background:var(--tint-accent)}
-.vrail-action:focus-visible{outline:2px solid var(--color-gold);outline-offset:2px}
-.vrail-action--cta{color:var(--color-gold);border-color:var(--color-border)}
-.vrail-action--cta:hover{background:var(--color-action);color:var(--color-on-action);border-color:var(--color-action)}
+.social-icon:focus-visible{outline:2px solid var(--color-gold);outline-offset:3px}
 
 /* ---------- Floating consultation offer ---------- */
 .consult{
@@ -1044,20 +1018,16 @@ section.block--flush-top{padding-top:0}
 .consult.is-collapsed .consult-pill{display:inline-flex}
 
 /* ---------- Responsive ----------
-   The rail is a desktop pattern; below 1024 everything falls back to the
-   sticky header and drawer that were already here. */
-@media(min-width:1024px){
-  .vrail{display:flex}
-  /* Offsetting body rather than main means the header, ticker and footer all
-     clear the rail too — box-sizing:border-box keeps this from overflowing. */
-  body{padding-left:var(--rail-width)}
-  /* Fixed elements are positioned against the viewport, not the padded body,
-     so they need the offset applied by hand. */
-  .consult{left:calc(var(--rail-width) + 24px)}
+   Nothing offsets the page any more: the floating icons sit over the content,
+   so the hero background runs edge to edge at every width. */
+@media(min-width:769px){
+  /* The floating column carries WhatsApp above 768, so the labelled green
+     button would be a second, competing WhatsApp affordance. It returns below
+     769 where the floating column is hidden. */
+  .wa{display:none}
 }
-@media(max-width:1023px){
-  .vrail{display:none}
-  body{padding-left:0}
+@media(max-width:768px){
+  .floating-social-bar{display:none}
 }
 @media(max-width:640px){
   /* Clear the WhatsApp button, which owns the opposite corner. */

@@ -63,37 +63,42 @@ Each service category carries its own accent (`body[data-category="…"]`), used
 for small labels and the artwork tint. The ground and the gold CTAs never move,
 so the site still reads as one brand.
 
-### Fixed vertical rail, ticker and consultation widget
+### Ticker, floating contact icons and consultation widget
 
 Three pieces of chrome live in the shared partials, so every page gets them:
 
 | Piece | Markup | Styles | Behaviour |
 | --- | --- | --- | --- |
 | Announcement ticker | `partials/header.html` | `.ticker*` | `initTicker()` |
-| Fixed vertical rail | `partials/header.html` | `.vrail*` | markup only |
+| Floating contact icons | `partials/footer.html` | `.floating-social-bar`, `.social-icon` | markup only |
 | Consultation offer | `partials/footer.html` | `.consult*` | `initConsult()` |
 
-- **Rail** shows at **≥1024px** only; below that the sticky header and drawer
-  carry navigation as before. `body` takes a `padding-left` of `--rail-width`
-  so the header, ticker and footer all clear it. Fixed-position elements are
-  laid out against the viewport rather than the padded body, so the
-  consultation widget re-applies the offset by hand.
+**Nothing offsets the page.** All three float over the content, so the hero
+background runs to the viewport edge at every width. There is no solid sidebar
+and no `body { padding-left }` — if you find yourself adding one, something has
+gone wrong.
+
 - **Ticker** messages are edited in `config.js` (`TICKER_MESSAGES`); today's
   opening hours are prepended automatically. The track holds the list twice and
   the keyframe translates `-50%`, so the loop wraps with no seam — if you build
   the content by hand, keep the duplicate. It pauses on hover *and* focus.
+- **Floating icons** are contact only — WhatsApp, phone, book, plus Instagram
+  once `CONFIG.instagram` is set. Navigation text stays in the header; do not
+  duplicate menu links here. The column itself is transparent with no border;
+  each icon is its own glass pill. Hidden at **≤768px**.
 - **Consultation widget** sits bottom-**left** because the WhatsApp button owns
-  the bottom-right corner. It defaults to collapsed and remembers the choice in
-  `localStorage` (`ahc-consult`).
+  the bottom-right corner on mobile. It defaults to collapsed and remembers the
+  choice in `localStorage` (`ahc-consult`).
 
-Two gotchas worth knowing if you port this pattern to another project:
+Two things worth knowing if you port this to another project:
 
-1. `transform: rotate(180deg)` on the rail's nav flips the **stacking order** as
-   well as the glyphs, so the first link lands at the bottom. `flex-direction:
-   row-reverse` puts it back.
-2. The rail's `z-index` is **180**, not the 999 in the generic reference — this
-   project's modal is 300, and a 999 rail would sit on top of it. The full stack
-   is listed next to `--z-rail` in `style.css`.
+1. The floating column carries WhatsApp above 768px, so the labelled green
+   `.wa` button is hidden there and returns below 769px. That keeps exactly one
+   WhatsApp affordance at every width. To show both, delete the `.wa` rule in
+   the `@media(min-width:769px)` block.
+2. `z-index` is **180**/**210**, not the 999 in the generic reference — this
+   project's modal is 300, and a 999 float would sit on top of it. The full
+   stack is listed next to `--z-social` in `style.css`.
 
 ### Swapping in real photography
 
