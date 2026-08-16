@@ -1,0 +1,5 @@
+# Normalise line endings so Windows/macOS/Linux edits don't produce noisy diffs.
+* text=auto eol=lf
+
+# Shell scripts must keep LF endings or bash will fail on them.
+*.sh text eol=lf

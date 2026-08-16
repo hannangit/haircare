@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Booking Works | Amara African Hair &amp; Beauty</title>
+<meta name="description" content="How to book an appointment at Amara African Hair &amp; Beauty in Milton Keynes — consultation, deposits, patch tests, how to prepare your hair, and our cancellation policy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>try{if(localStorage.getItem("amara-theme")==="night")document.documentElement.dataset.theme="night";}catch(e){}</script>
+</head>
+<body>
+
+<!-- @header -->
+<a class="skip-link" href="#main">Skip to content</a>
+
+<a class="wa" href="https://wa.me/447700900123" target="_blank" rel="noopener" aria-label="Message Amara African Hair &amp; Beauty on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94
+             1.16-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2
+             0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.06 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49
+             1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35z"/>
+    <path d="M12 2A10 10 0 0 0 3.5 17.2L2 22l4.94-1.46A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0
+             1-4.18-1.14l-.3-.18-3.1.92.93-3.02-.2-.31A8.2 8.2 0 1 1 12 20.2z"/>
+  </svg>
+  <span class="wa-label">WhatsApp Us</span>
+</a>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html"><span class="mark">AM</span>Amara Hair &amp; Beauty</a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="services.html" data-nav="services">Services &amp; Prices</a>
+      <a href="booking.html" data-nav="booking" data-active="1">Booking</a>
+
+      <!-- Aftercare tools listed directly — the hub page is reachable from the
+           homepage and footer, so the menu goes straight to the guide. -->
+      <div class="nav-item">
+        <button type="button" class="nav-toggle" data-nav="care" aria-expanded="false">Hair Care<span class="caret" aria-hidden="true">▾</span></button>
+        <div class="nav-sub">
+          <a href="hair-care-hub.html">Hair Care Hub</a>
+          <a href="care/aftercare.html">Aftercare Guide</a>
+          <a href="care/aftercare.html#salon-terms">Salon Terms</a>
+          <a href="care/complaints.html">Feedback &amp; Complaints</a>
+          <a href="team.html">Meet the Stylists</a>
+        </div>
+      </div>
+
+      <div class="nav-item">
+        <button type="button" class="nav-toggle" data-nav="work" aria-expanded="false">Work With Us<span class="caret" aria-hidden="true">▾</span></button>
+        <div class="nav-sub">
+          <a href="stylists.html">Chair Rental</a>
+          <a href="stylists.html#what-we-offer">What We Offer</a>
+          <a href="stylists.html#apply">Apply to Join</a>
+        </div>
+      </div>
+
+      <a href="visit-us.html" data-nav="visit">Visit Us</a>
+    </nav>
+
+    <div class="nav-cta">
+      <div class="theme-switch" role="group" aria-label="Colour theme">
+        <button type="button" class="theme-pill" data-theme-set="day" aria-pressed="true">Day</button>
+        <button type="button" class="theme-pill" data-theme-set="night" aria-pressed="false">Night</button>
+      </div>
+      <button type="button" class="burger" data-action="toggle-menu" aria-label="Menu" aria-expanded="false" aria-controls="mmenu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+
+  <div class="menu-backdrop" id="menu-backdrop" data-action="close-menu" aria-hidden="true"></div>
+
+  <div class="mobile-menu" id="mmenu" role="dialog" aria-modal="true" aria-label="Menu">
+    <button type="button" class="menu-close" data-action="close-menu" aria-label="Close menu">&#10005;</button>
+    <a href="services.html">Services &amp; Prices</a>
+    <a href="booking.html">Booking</a>
+    <a href="visit-us.html">Visit Us</a>
+    <span class="mm-group">Hair Care</span>
+    <a href="hair-care-hub.html">Hair Care Hub</a>
+    <a href="care/aftercare.html">Aftercare Guide</a>
+    <a href="care/complaints.html">Feedback &amp; Complaints</a>
+    <a href="team.html">Meet the Stylists</a>
+    <span class="mm-group">Work With Us</span>
+    <a href="stylists.html">Chair Rental</a>
+    <a href="stylists.html#apply">Apply to Join</a>
+    <span class="mm-group">More</span>
+    <a href="index.html#contact">Contact</a>
+    <span class="mm-group">Appearance</span>
+    <div class="theme-switch" role="group" aria-label="Colour theme">
+      <button type="button" class="theme-pill" data-theme-set="day" aria-pressed="true">Day</button>
+      <button type="button" class="theme-pill" data-theme-set="night" aria-pressed="false">Night</button>
+    </div>
+  </div>
+</header>
+<!-- @/header -->
+
+<main id="main">
+
+<section class="subhero">
+  <div class="wrap in">
+    <a class="back-link" href="services.html">← Back to the menu</a>
+    <span class="eyebrow">How It Works</span>
+    <h1>A clear, four-step booking.</h1>
+    <p>Found a style you like? Here is exactly what happens next — including what we need from you, and what we will not ask for until the day.</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h4>Choose &amp; ask</h4><p>Send a request for the service you want, or ask us to help you pick.</p></div>
+      <div class="step"><div class="n">2</div><h4>Free consultation</h4><p>In person or on a video call, so we can see your hair before we quote.</p></div>
+      <div class="step"><div class="n">3</div><h4>Deposit &amp; slot</h4><p>A £20 deposit holds the chair and comes off the final price.</p></div>
+      <div class="step"><div class="n">4</div><h4>Prep &amp; appointment</h4><p>We send your prep list, then we see you on the day.</p></div>
+    </div>
+
+    <!-- Dense detail split into tabs rather than stacked side by side -->
+    <div class="tabs" id="detail">
+      <div class="tablist" role="tablist" aria-label="Booking details">
+        <button type="button" class="tab-btn" role="tab" data-tab="prep" id="tab-prep" aria-controls="panel-prep" aria-selected="true">Preparing your hair</button>
+        <button type="button" class="tab-btn" role="tab" data-tab="deposit" id="tab-deposit" aria-controls="panel-deposit" aria-selected="false">Deposits &amp; cancellations</button>
+        <button type="button" class="tab-btn" role="tab" data-tab="patch" id="tab-patch" aria-controls="panel-patch" aria-selected="false">Patch tests</button>
+        <button type="button" class="tab-btn" role="tab" data-tab="book" id="tab-book" aria-controls="panel-book" aria-selected="false">Book now</button>
+      </div>
+
+      <div class="tab-panel" role="tabpanel" data-panel="prep" id="panel-prep" aria-labelledby="tab-prep">
+        <p class="sub">Turning up prepared is the single biggest thing that shortens your appointment and makes the style last.</p>
+        <ul class="doc-list">
+          <li><span class="dm">1</span><div><b>Wash and blow-dry the day before</b> — clean, stretched, product-free hair braids far faster than freshly oiled hair.</div></li>
+          <li><span class="dm">2</span><div><b>Detangle from the ends up.</b> Come with your hair in loose sections if you can.</div></li>
+          <li><span class="dm">3</span><div><b>Bring your extension hair</b> where the service needs it. Each service page tells you how many packs.</div></li>
+          <li><span class="dm">4</span><div><b>Take your last style out fully</b> before you arrive. Take-downs are charged separately if we do them.</div></li>
+          <li><span class="dm">5</span><div><b>Eat before a long appointment.</b> Braids can run five hours or more — bring a drink and headphones.</div></li>
+        </ul>
+        <p class="sub u-mt-16">Not sure about any of this? Message us before your appointment and we'll talk it through.</p>
+      </div>
+
+      <div class="tab-panel" role="tabpanel" data-panel="deposit" id="panel-deposit" aria-labelledby="tab-deposit" hidden>
+        <div class="deposit-box">
+          <span class="eyebrow eyebrow--gold">Booking Deposit</span>
+          <div class="amt">£20</div>
+          <p>Holds your chair, and comes straight off the price of your service on the day.</p>
+        </div>
+
+        <h3 class="u-mt-26">Securing your appointment</h3>
+        <ul class="bullets-square u-mt-8">
+          <li>The deposit is taken <b>after</b> we have agreed a time — never before, and never to browse.</li>
+          <li>The balance is paid on the day by card, cash or bank transfer.</li>
+          <li>Appointments over four hours may need a larger deposit at busy times; we will always say so up front.</li>
+        </ul>
+
+        <div class="important-box u-mt-16">
+          <b>Changes and cancellations:</b>
+          <ul>
+            <li>Move or cancel with <b>48 hours' notice</b> and your deposit carries over to the new date.</li>
+            <li>Under 48 hours, or a no-show, and the deposit is kept — it covers the chair we held empty.</li>
+            <li>Arriving more than 20 minutes late may mean we have to shorten or rebook the style.</li>
+            <li>If we ever have to cancel on you, your deposit is refunded in full.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tab-panel" role="tabpanel" data-panel="patch" id="panel-patch" aria-labelledby="tab-patch" hidden>
+        <p class="sub">Some services legally and sensibly need a patch test at least 48 hours before your appointment.</p>
+        <ul class="bullets-check u-mt-8">
+          <li><b>Relaxers and texturisers</b> — plus a strand test on the day.</li>
+          <li><b>Lash extensions</b> — for the adhesive.</li>
+          <li><b>Brow and lash tints</b> — for the dye.</li>
+          <li><b>Bonded wig installs</b> — for the adhesive.</li>
+        </ul>
+        <p class="sub u-mt-16">Patch tests take two minutes and are free. Pop in any time we are open, or ask us to post one out. We cannot carry out these services without one, even if you have had them elsewhere.</p>
+        <div class="important-box u-mt-16">
+          <b>Tell us in advance if you:</b>
+          <ul>
+            <li>are pregnant, or have had a baby in the last six months</li>
+            <li>are on medication that affects your hair or scalp</li>
+            <li>have had a reaction to hair products before</li>
+            <li>have any scalp condition, tenderness or hair loss you are worried about</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tab-panel" role="tabpanel" data-panel="book" id="panel-book" aria-labelledby="tab-book" hidden>
+        <p class="sub">Three ways to get a slot. All of them start with a free consultation.</p>
+        <div class="action-grid u-mt-16">
+          <button class="btn btn-black" type="button" data-book="">Request an appointment</button>
+          <a class="btn btn-outline" href="https://wa.me/447700900123" data-booking-link target="_blank" rel="noopener"><span data-icon="calendar" data-icon-size="18"></span> Book online</a>
+          <a class="btn btn-outline" href="tel:+447700900123">Call +44 7700 900123</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="u-center u-mt-32"><a class="btn btn-dark" href="services.html">See services &amp; prices →</a></div>
+  </div>
+</section>
+
+</main>
+
+<!-- @footer -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div><div class="foot-brand"><span class="mark">AM</span>Amara Hair &amp; Beauty</div><p>African hair care and beauty in Central Milton Keynes — braids, locs, weaves, natural hair and beauty treatments.</p></div>
+      <div><h5>Services</h5><ul><li><a href="services.html">Full Menu &amp; Prices</a></li><li><a href="services.html?category=Braids">Braids</a></li><li><a href="services.html?category=Twists%20%26%20Locs">Twists &amp; Locs</a></li><li><a href="services.html?category=Weaves%20%26%20Wigs">Weaves &amp; Wigs</a></li><li><a href="services.html?category=Beauty">Beauty</a></li></ul></div>
+      <div><h5>Booking</h5><ul><li><a href="booking.html">How Booking Works</a></li><li><a href="book-appointment.html">Book an Appointment</a></li><li><a href="booking.html#deposit">Deposits &amp; Cancellations</a></li><li><a href="visit-us.html">Getting Here</a></li></ul></div>
+      <div><h5>Hair Care</h5><ul><li><a href="hair-care-hub.html">Hair Care Hub</a></li><li><a href="care/aftercare.html">Aftercare Guide</a></li><li><a href="care/aftercare.html#salon-terms">Salon Terms</a></li><li><a href="care/complaints.html">Feedback &amp; Complaints</a></li></ul></div>
+      <div><h5>About</h5><ul>
+        <li><a href="team.html">Our Stylists</a></li>
+        <li><a href="stylists.html">Work With Us</a></li>
+        <li><a href="index.html#reviews">Reviews</a></li>
+        <li><a href="tel:+447700900123">+44 7700 900123</a></li>
+        <li><a href="mailto:hello@amarahairbeauty.co.uk">hello@amarahairbeauty.co.uk</a><br><span class="foot-note">General enquiries</span></li>
+        <li><a href="mailto:feedback@amarahairbeauty.co.uk">feedback@amarahairbeauty.co.uk</a><br><span class="foot-note">Feedback &amp; complaints</span></li>
+      </ul></div>
+    </div>
+    <div class="footer-legal">
+      <p>Amara Hair &amp; Beauty Ltd — Company No: [00000000]</p>
+      <p>Unit 4, Silbury Arcade, Central Milton Keynes, MK9 3AG</p>
+      <p>NHBF membership No: [000000]</p>
+      <p>Salon insurance held with [insurer]</p>
+    </div>
+    <div class="foot-bottom"><span class="footer-copyright">Copyright &copy; 2026 Amara Hair &amp; Beauty Ltd</span></div>
+  </div>
+</footer>
+<!-- @/footer -->
+
+<!-- @modal -->
+<div class="modal-bg" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title" hidden>
+  <div class="modal" role="document">
+    <div class="modal-hd">
+      <div>
+        <h3 id="m-title">Book an appointment</h3>
+        <div class="psub" id="m-sub"></div>
+      </div>
+      <button type="button" class="x" id="m-close" aria-label="Close form">&#10005;</button>
+    </div>
+    <div class="modal-bd">
+      <form id="m-form" novalidate>
+        <div class="form-error" id="m-error" role="alert"></div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="m-fname">First name <span class="req">*</span></label>
+            <input id="m-fname" name="firstName" type="text" autocomplete="given-name" required aria-describedby="m-fname-err">
+            <p class="field-err" id="m-fname-err"></p>
+          </div>
+          <div class="field">
+            <label for="m-lname">Last name <span class="opt">(optional)</span></label>
+            <input id="m-lname" name="lastName" type="text" autocomplete="family-name">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="m-email">Email <span class="req">*</span></label>
+            <input id="m-email" name="email" type="email" autocomplete="email" required aria-describedby="m-email-err">
+            <p class="field-err" id="m-email-err"></p>
+          </div>
+          <div class="field">
+            <label for="m-phone">Phone <span class="opt">(optional)</span></label>
+            <input id="m-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
+          </div>
+        </div>
+
+        <!-- Clients booking an appointment. The service list is built from
+             services-data.js by initServicePicker(), so it can never drift. -->
+        <div class="field" data-audience="client">
+          <label for="m-service-pick">Service</label>
+          <select id="m-service-pick" name="serviceName"></select>
+        </div>
+        <div class="form-row" data-audience="client">
+          <div class="field">
+            <label for="m-date">Preferred date <span class="opt">(optional)</span></label>
+            <input type="date" id="m-date" name="preferredDate">
+          </div>
+          <div class="field">
+            <label for="m-time">Preferred time <span class="opt">(optional)</span></label>
+            <select id="m-time" name="preferredTime">
+              <option value="">Any time</option>
+              <option>Morning (from 9am)</option>
+              <option>Afternoon (from 12pm)</option>
+              <option>Late afternoon (from 3pm)</option>
+              <option>Evening (from 5pm)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Stylists applying for a chair -->
+        <div class="field" data-audience="stylist" hidden>
+          <label for="m-specialism">What do you specialise in? <span class="req">*</span></label>
+          <input id="m-specialism" name="specialism" type="text" aria-describedby="m-specialism-err" placeholder="Knotless braids, locs, lashes…">
+          <p class="field-err" id="m-specialism-err"></p>
+        </div>
+        <div class="form-row" data-audience="stylist" hidden>
+          <div class="field">
+            <label for="m-experience">Years of experience <span class="opt">(optional)</span></label>
+            <select id="m-experience" name="experience">
+              <option value="">Select…</option>
+              <option>Less than 1</option><option>1–3</option><option>3–5</option><option>5–10</option><option>10+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="m-portfolio">Instagram or portfolio <span class="opt">(optional)</span></label>
+            <input id="m-portfolio" name="portfolio" type="text" inputmode="url" placeholder="@yourhandle">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="m-message" id="m-message-label">Anything we should know? <span class="opt">(optional)</span></label>
+          <textarea id="m-message" name="message" rows="2"></textarea>
+        </div>
+
+        <input type="hidden" id="m-service">
+        <button class="btn btn-black u-full" id="m-submit" type="submit">Request this appointment</button>
+        <p class="note" id="m-note"></p>
+      </form>
+
+      <div class="success" id="m-success" role="status">
+        <div class="tick">&#10003;</div>
+        <h3 id="m-success-title">Request sent</h3>
+        <p id="m-success-txt"></p>
+        <p id="m-success-next"></p>
+        <a class="btn btn-outline btn-sm u-mt-14" id="m-success-cta" href="booking.html">See how booking works &rarr;</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- @/modal -->
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/services-data.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

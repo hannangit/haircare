@@ -1,0 +1,13 @@
+# Editor / assistant config containing machine-specific absolute paths
+.claude/
+
+# OS cruft
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs and temp files
+*.log
+*.tmp
+*~
