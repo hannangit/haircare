@@ -88,7 +88,8 @@ for f in $PAGES; do
   ' "$f"
 
   if [ -n "$ACTIVE" ]; then
-    ACTIVE="$ACTIVE" perl -0777 -i -pe 's/data-nav="\Q$ENV{ACTIVE}\E"/data-nav="$ENV{ACTIVE}" data-active="1"/' "$f"
+    # /g so every copy of the key is marked, not just the first.
+    ACTIVE="$ACTIVE" perl -0777 -i -pe 's/data-nav="\Q$ENV{ACTIVE}\E"/data-nav="$ENV{ACTIVE}" data-active="1"/g' "$f"
   fi
 
   echo "  built $f  (base: '${BASE:-<relative>}')"

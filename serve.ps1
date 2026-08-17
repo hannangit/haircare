@@ -4,7 +4,7 @@
 # Or, from a POSIX shell:  bash serve.sh
 #
 # Serves the project root, so paths resolve the same way they will in production.
-param([int]$Port = 8752)
+param([int]$Port = 8761)
 
 Set-Location -LiteralPath $PSScriptRoot
 

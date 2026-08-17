@@ -9,11 +9,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<script>try{if(localStorage.getItem("ahc-theme")==="light")document.documentElement.dataset.theme="light";}catch(e){}</script>
 </head>
 <body data-service="brow-shaping">
 
 <!-- @header -->
 <a class="skip-link" href="#main">Skip to content</a>
+
+<!-- Announcement ticker. Offers only. Content is injected by initTicker() so the
+     loop can be duplicated for a seamless wrap. -->
+<div class="ticker" id="ticker" hidden>
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
 
 <a class="wa" href="https://wa.me/447700900123" target="_blank" rel="noopener" aria-label="Message African Hair Care on WhatsApp">
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -31,37 +39,20 @@
   <div class="wrap nav">
     <a class="brand" href="../index.html">African Hair Care</a>
 
+    <!-- Four destinations, no dropdowns. Everything secondary (chair rental,
+         complaints, stylists, salon terms) lives in the footer. -->
     <nav class="nav-links" aria-label="Primary">
-      <a href="../services.html" data-nav="services" data-active="1">Services &amp; Prices</a>
+      <a href="../services.html" data-nav="services" data-active="1">Find Your Style</a>
       <a href="../booking.html" data-nav="booking">Booking</a>
-
-      <!-- Aftercare tools listed directly — the hub page is reachable from the
-           homepage and footer, so the menu goes straight to the guide. -->
-      <div class="nav-item">
-        <button type="button" class="nav-toggle" data-nav="care" aria-expanded="false">Hair Care<span class="caret" aria-hidden="true">▾</span></button>
-        <div class="nav-sub">
-          <a href="../hair-care-hub.html">Hair Care Hub</a>
-          <a href="../care/aftercare.html">Aftercare Guide</a>
-          <a href="../care/aftercare.html#salon-terms">Salon Terms</a>
-          <a href="../care/complaints.html">Feedback &amp; Complaints</a>
-          <a href="../team.html">Meet the Stylists</a>
-        </div>
-      </div>
-
-      <div class="nav-item">
-        <button type="button" class="nav-toggle" data-nav="work" aria-expanded="false">Work With Us<span class="caret" aria-hidden="true">▾</span></button>
-        <div class="nav-sub">
-          <a href="../stylists.html">Chair Rental</a>
-          <a href="../stylists.html#what-we-offer">What We Offer</a>
-          <a href="../stylists.html#apply">Apply to Join</a>
-        </div>
-      </div>
-
-      <a href="../visit-us.html" data-nav="visit">Visit Us</a>
+      <a href="../care/aftercare.html" data-nav="care">After Care</a>
+      <a href="../visit-us.html" data-nav="visit">Find Us</a>
     </nav>
 
     <div class="nav-cta">
-      <button class="btn btn-gold btn-sm nav-book" type="button" data-book="">Book</button>
+      <div class="theme-switch" role="group" aria-label="Colour theme">
+        <button type="button" class="theme-pill" data-theme-set="dark" aria-pressed="true">Dark</button>
+        <button type="button" class="theme-pill" data-theme-set="light" aria-pressed="false">Light</button>
+      </div>
       <button type="button" class="burger" data-action="toggle-menu" aria-label="Menu" aria-expanded="false" aria-controls="mmenu"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -70,19 +61,16 @@
 
   <div class="mobile-menu" id="mmenu" role="dialog" aria-modal="true" aria-label="Menu">
     <button type="button" class="menu-close" data-action="close-menu" aria-label="Close menu">&#10005;</button>
-    <a href="../services.html">Services &amp; Prices</a>
+    <a href="../services.html">Find Your Style</a>
     <a href="../booking.html">Booking</a>
-    <a href="../visit-us.html">Visit Us</a>
-    <span class="mm-group">Hair Care</span>
-    <a href="../hair-care-hub.html">Hair Care Hub</a>
-    <a href="../care/aftercare.html">Aftercare Guide</a>
-    <a href="../care/complaints.html">Feedback &amp; Complaints</a>
-    <a href="../team.html">Meet the Stylists</a>
-    <span class="mm-group">Work With Us</span>
-    <a href="../stylists.html">Chair Rental</a>
-    <a href="../stylists.html#apply">Apply to Join</a>
-    <span class="mm-group">More</span>
+    <a href="../care/aftercare.html">After Care</a>
+    <a href="../visit-us.html">Find Us</a>
     <a href="../index.html#contact">Contact</a>
+    <span class="mm-group">Appearance</span>
+    <div class="theme-switch" role="group" aria-label="Colour theme">
+      <button type="button" class="theme-pill" data-theme-set="dark" aria-pressed="true">Dark</button>
+      <button type="button" class="theme-pill" data-theme-set="light" aria-pressed="false">Light</button>
+    </div>
     <button class="btn btn-gold mm-book" type="button" data-book="">Book an appointment</button>
   </div>
 </header>
@@ -137,6 +125,41 @@
     <div class="foot-bottom"><span class="footer-copyright">Copyright &copy; 2026 African Hair Care Ltd</span></div>
   </div>
 </footer>
+
+<!-- Floating contact icons. No container background or divider — each icon is
+     its own glass pill sitting directly over the page. Navigation text stays in
+     the header; nothing is duplicated here. Hidden at <=768px, where the
+     WhatsApp button takes over. -->
+<div class="floating-social-bar" role="group" aria-label="Contact us">
+  <a class="social-icon" data-social="instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram" hidden><span data-icon="instagram" data-icon-size="19"></span></a>
+  <a class="social-icon" href="https://wa.me/447700900123" target="_blank" rel="noopener" aria-label="Message us on WhatsApp"><span data-icon="whatsapp" data-icon-size="19"></span></a>
+  <a class="social-icon" href="tel:+447700900123" aria-label="Call the salon"><span data-icon="phone" data-icon-size="19"></span></a>
+  <!-- The only persistent book CTA on desktop, now the header button is gone. -->
+  <button class="social-icon social-icon--cta" type="button" data-book="" aria-label="Book an appointment"><span data-icon="calendar" data-icon-size="19"></span></button>
+</div>
+
+<button class="to-top" type="button" data-action="to-top" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<!-- Floating consultation offer. Sits bottom-LEFT because the WhatsApp button
+     owns the bottom-right corner on mobile.
+     Collapsed state is remembered, so it can't nag on every page. -->
+<aside class="consult" id="consult" aria-label="Free consultation offer">
+  <button class="consult-pill" type="button" data-action="consult-expand" aria-expanded="true" aria-controls="consult-body">
+    <span class="consult-spark" aria-hidden="true">&#10022;</span>
+    <span>Free Consultation</span>
+  </button>
+
+  <div class="consult-body" id="consult-body">
+    <button class="consult-collapse" type="button" data-action="consult-collapse" aria-label="Collapse this offer">&#8211;</button>
+    <h3>Free Hair Consultation</h3>
+    <p>A free 15-minute texture and style assessment before any appointment — no obligation to book on the day.</p>
+    <button class="btn btn-gold btn-sm consult-cta" type="button" data-book="">Book my consultation</button>
+  </div>
+</aside>
 <!-- @/footer -->
 
 <!-- @modal -->

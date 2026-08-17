@@ -24,8 +24,22 @@ const CONFIG = {
   email: 'hello@africanhaircare.co.uk',
 
   address: 'Unit 4, Silbury Arcade, Central Milton Keynes, MK9 3AG',
-  mapsQuery: 'Silbury Arcade, Central Milton Keynes, MK9 3AG'
+  mapsQuery: 'Silbury Arcade, Central Milton Keynes, MK9 3AG',
+
+  // 5. Social. Leave blank and the icon is simply not rendered, rather than
+  //    linking somewhere that doesn't exist.
+  instagram: ''
 };
+
+/* Announcement ticker. Each entry becomes one item in the scrolling bar; today's
+   opening hours are prepended automatically. Keep them short — the bar is thin
+   and the loop should stay readable. */
+const TICKER_MESSAGES = [
+  'New client offer — 10% off your first braiding appointment',
+  'Free 15-minute consultation with every booking',
+  'Knotless braids are booking ~2 weeks ahead — reserve early',
+  'Walk-ins welcome for brows, threading and quick treatments'
+];
 
 /* Opening hours, in one place so the header, footer and Visit Us page agree. */
 const OPENING_HOURS = [

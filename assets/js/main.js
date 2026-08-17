@@ -27,6 +27,27 @@ function initIntro() {
   }, hold);
 }
 
+/* ---------- Colour theme (Dark / Light) ----------
+   Dark is the brand default and lives in :root, so only "light" ever sets the
+   attribute. A script in each page head applies the saved choice before first
+   paint, otherwise a light-theme visitor gets a dark flash on every load. */
+function applyTheme(name) {
+  const root = document.documentElement;
+  if (name === 'light') root.dataset.theme = 'light';
+  else delete root.dataset.theme;
+  try { localStorage.setItem('ahc-theme', name); } catch (e) { /* private mode */ }
+  document.querySelectorAll('[data-theme-set]').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.themeSet === name));
+  });
+}
+function initTheme() {
+  const current = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+  document.querySelectorAll('[data-theme-set]').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.themeSet === current));
+    b.addEventListener('click', () => applyTheme(b.dataset.themeSet));
+  });
+}
+
 /* ---------- Tabs ----------
    Markup: .tabs > .tablist > button[data-tab="id"] , then .tab-panel[data-panel="id"].
    Honours a #hash matching a tab key so other pages can deep-link into a panel. */
@@ -129,6 +150,67 @@ function initHours() {
       <span class="hours-time${h.hours === 'Closed' ? ' is-closed' : ''}">${h.hours}</span>
     </div>`).join('');
   targets.forEach(el => { el.innerHTML = rows; });
+}
+
+/* ---------- Announcement ticker ----------
+   The track holds the message list twice: the keyframe translates -50%, which
+   lands exactly on the start of the second copy, so the loop has no visible
+   seam. The duplicate is aria-hidden so it isn't read out twice. */
+function initTicker() {
+  const track = document.getElementById('ticker-track');
+  if (!track || typeof TICKER_MESSAGES === 'undefined') return;
+
+  // Offers only. Opening hours live on Find Us and in the footer, where someone
+  // looking for them can actually read them rather than wait for a loop.
+  const group = TICKER_MESSAGES.map(m => '<span class="ticker-item">' + m + '</span>').join('');
+
+  track.innerHTML = group + '<span aria-hidden="true">' + group + '</span>';
+  document.getElementById('ticker').hidden = false;
+
+  // A short list on a wide screen would leave a gap before the wrap, so pace the
+  // animation by content width rather than a fixed duration.
+  const width = track.scrollWidth / 2;
+  if (width) track.style.animationDuration = Math.max(30, Math.round(width / 45)) + 's';
+}
+
+/* ---------- Floating consultation offer ----------
+   Collapsed state is remembered, so the card doesn't re-open on every page. */
+function setConsult(collapsed) {
+  const el = document.getElementById('consult');
+  if (!el) return;
+  el.classList.toggle('is-collapsed', collapsed);
+  const pill = el.querySelector('.consult-pill');
+  if (pill) pill.setAttribute('aria-expanded', String(!collapsed));
+  try { localStorage.setItem('ahc-consult', collapsed ? 'collapsed' : 'open'); } catch (e) { /* private mode */ }
+}
+function initConsult() {
+  const el = document.getElementById('consult');
+  if (!el) return;
+  let stored = null;
+  try { stored = localStorage.getItem('ahc-consult'); } catch (e) { /* private mode */ }
+  // Default to collapsed: an offer that covers content unasked is an annoyance.
+  setConsult(stored !== 'open');
+}
+
+/* ---------- Back to top ----------
+   Only appears once there is something to scroll back from. */
+function initToTop() {
+  const btn = document.querySelector('.to-top');
+  if (!btn) return;
+  const toggle = () => btn.classList.toggle('is-visible', window.scrollY > 600);
+  toggle();
+  window.addEventListener('scroll', toggle, { passive: true });
+  // A page opened at an #anchor, or restored mid-page on a back navigation,
+  // is already scrolled before any scroll event fires.
+  window.addEventListener('load', toggle);
+}
+function scrollToTop() {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  // Send focus back to the top of the document, or a keyboard user is left
+  // stranded at the bottom of the tab order.
+  const first = document.querySelector('.skip-link');
+  if (first) first.focus({ preventScroll: true });
 }
 
 /* ---------- ServiceCard — the single card component used everywhere ---------- */
@@ -462,11 +544,15 @@ function showSuccess(isStylist) {
 /* ---------- Page init ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   initIntro();
+  initTheme();
   initNav();
   initMobileMenu();
   initIcons();
   initTabs();
   initHours();
+  initTicker();
+  initConsult();
+  initToTop();
   initCategories();
   initSearch();
   initServicePicker();
@@ -481,6 +567,9 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'close-menu':    setMenu(false); break;
       case 'clear-filters': clearFilters(); break;
       case 'open-stylist':  openStylist(); break;
+      case 'consult-collapse': setConsult(true); break;
+      case "consult-expand":   setConsult(false); break;
+      case "to-top":           scrollToTop(); break;
     }
   });
 
@@ -515,6 +604,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const manual = document.getElementById('booking-manual');
     if (manual) manual.hidden = true;
   }
+
+  // Social links appear only once a real handle is configured — an icon that
+  // links to "#" is worse than no icon.
+  document.querySelectorAll('[data-social]').forEach(el => {
+    const url = CONFIG[el.dataset.social];
+    if (url) { el.href = url; el.hidden = false; }
+  });
 
   // CONFIG-driven links (each already has a working WhatsApp fallback href)
   document.querySelectorAll('[data-booking-link]').forEach(el => { if (CONFIG.bookingUrl) el.href = CONFIG.bookingUrl; });

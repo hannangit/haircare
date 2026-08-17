@@ -13,7 +13,7 @@ from disk. To view it exactly as it will be served:
 bash serve.sh
 ```
 
-Then open <http://localhost:8752>.
+Then open <http://localhost:8761>.
 
 ## Editing content
 
@@ -27,8 +27,18 @@ Then open <http://localhost:8752>.
 
 ## Design
 
-One dark theme, no light mode and no theme switcher. The whole palette lives in
-the `:root` block at the top of `style.css`:
+Two themes, switchable from the header (and from the drawer on a phone).
+**Dark is the default**; light is opt-in and remembered in `localStorage` under
+`ahc-theme`. Each page carries a one-line script in its `<head>` that applies the
+saved choice *before first paint* — without it, a light-theme visitor gets a dark
+flash on every page load.
+
+To make light the default instead, swap the two blocks in `style.css` so the
+light values sit in `:root`, and flip the check in the head script and in
+`applyTheme()`/`initTheme()` in `main.js`.
+
+The palette lives in the `:root` block at the top of `style.css`, with the light
+theme overriding tokens under `html[data-theme="light"]`:
 
 - **Ground** — `--color-ink-900/800/700` — near-black with a purple cast.
 - **Gold** — `--color-gold` and friends — the single accent. Reserved for the
@@ -39,10 +49,56 @@ the `:root` block at the top of `style.css`:
 - **Rhythm** — `--space-heading`, `--space-block` and `--space-section` drive the
   vertical spacing. Prefer these over one-off margins, so components can't drift
   apart again.
+- **Theme-dependent surfaces** — `--tint-1`, `--scrim`, `--header-bg`,
+  `--panel-grad`, `--hero-bg`, `--media-filter` and friends. If you're about to
+  hardcode a colour that only works on one theme, add a token here instead.
+
+On light, the gold deepens to a bronze (`#8C601F`) because `#D9AE62` on cream is
+about 2:1 and fails as text; decoration keeps the brighter gold via
+`--gold-decor`, which carries no text. The primary button also inverts to
+aubergine on light, since a gold fill barely separates from an ivory page.
+Every text/background pair in both themes measures at or above 5:1.
 
 Each service category carries its own accent (`body[data-category="…"]`), used
 for small labels and the artwork tint. The ground and the gold CTAs never move,
 so the site still reads as one brand.
+
+### Ticker, floating contact icons and consultation widget
+
+Three pieces of chrome live in the shared partials, so every page gets them:
+
+| Piece | Markup | Styles | Behaviour |
+| --- | --- | --- | --- |
+| Announcement ticker | `partials/header.html` | `.ticker*` | `initTicker()` |
+| Floating contact icons | `partials/footer.html` | `.floating-social-bar`, `.social-icon` | markup only |
+| Consultation offer | `partials/footer.html` | `.consult*` | `initConsult()` |
+
+**Nothing offsets the page.** All three float over the content, so the hero
+background runs to the viewport edge at every width. There is no solid sidebar
+and no `body { padding-left }` — if you find yourself adding one, something has
+gone wrong.
+
+- **Ticker** messages are edited in `config.js` (`TICKER_MESSAGES`); today's
+  opening hours are prepended automatically. The track holds the list twice and
+  the keyframe translates `-50%`, so the loop wraps with no seam — if you build
+  the content by hand, keep the duplicate. It pauses on hover *and* focus.
+- **Floating icons** are contact only — WhatsApp, phone, book, plus Instagram
+  once `CONFIG.instagram` is set. Navigation text stays in the header; do not
+  duplicate menu links here. The column itself is transparent with no border;
+  each icon is its own glass pill. Hidden at **≤768px**.
+- **Consultation widget** sits bottom-**left** because the WhatsApp button owns
+  the bottom-right corner on mobile. It defaults to collapsed and remembers the
+  choice in `localStorage` (`ahc-consult`).
+
+Two things worth knowing if you port this to another project:
+
+1. The floating column carries WhatsApp above 768px, so the labelled green
+   `.wa` button is hidden there and returns below 769px. That keeps exactly one
+   WhatsApp affordance at every width. To show both, delete the `.wa` rule in
+   the `@media(min-width:769px)` block.
+2. `z-index` is **180**/**210**, not the 999 in the generic reference — this
+   project's modal is 300, and a 999 float would sit on top of it. The full
+   stack is listed next to `--z-social` in `style.css`.
 
 ### Swapping in real photography
 
