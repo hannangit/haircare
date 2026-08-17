@@ -60,10 +60,15 @@
   --space-section:  clamp(64px, 9vw, 120px);
 
   /* Layer stack, declared in one place so nothing guesses:
-     header 100 · drawer 150 · social 180 · WhatsApp 200 · consult 210 · modal 300.
-     These deliberately sit below the modal — a 999 float would cover it. */
+     header 100 · social 180 · WhatsApp 200 · consult 210 · scrim 215 ·
+     drawer 220 · modal 300.
+     The floats deliberately sit below the modal — a 999 float would cover it —
+     and below the drawer, so an open menu isn't punctured by the WhatsApp and
+     consultation buttons sitting on top of it. */
   --z-social: 180;
   --z-consult: 210;
+  --z-scrim: 215;
+  --z-drawer: 220;
 
   /* ---- Theme-dependent surfaces ----
      Anything that would otherwise hardcode a dark value lives here, so the
@@ -272,7 +277,7 @@ header{position:sticky;top:0;z-index:100;background:var(--header-bg);backdrop-fi
   overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
   transform:translateX(100%);visibility:hidden;
   transition:transform .28s cubic-bezier(.2,0,0,1),visibility .28s;
-  z-index:150;
+  z-index:var(--z-drawer);
 }
 .mobile-menu.open{transform:translateX(0);visibility:visible}
 .mobile-menu a{display:flex;align-items:center;min-height:50px;padding:6px 4px;font-weight:500;color:var(--color-ink-primary);border-bottom:1px solid var(--color-border);cursor:pointer}
@@ -286,7 +291,7 @@ header{position:sticky;top:0;z-index:100;background:var(--header-bg);backdrop-fi
 }
 .menu-close:focus-visible{outline:2px solid var(--color-gold);outline-offset:2px}
 .menu-backdrop{
-  position:fixed;inset:0;z-index:140;
+  position:fixed;inset:0;z-index:var(--z-scrim);
   background:var(--scrim);
   opacity:0;visibility:hidden;transition:opacity .28s,visibility .28s;
 }

@@ -561,7 +561,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', e => {
     const t = e.target.closest('[data-action], [data-book]');
     if (!t) return;
-    if (t.dataset.book !== undefined) { openBooking(t.dataset.book); return; }
+    if (t.dataset.book !== undefined) {
+      // The drawer's own Book button would otherwise leave the drawer open
+      // behind the modal, with both trying to own body.style.overflow.
+      if (menuIsOpen()) setMenu(false);
+      openBooking(t.dataset.book);
+      return;
+    }
     switch (t.dataset.action) {
       case 'toggle-menu':   toggleMenu(); break;
       case 'close-menu':    setMenu(false); break;

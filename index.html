@@ -75,23 +75,29 @@
     </div>
   </div>
 
-  <div class="menu-backdrop" id="menu-backdrop" data-action="close-menu" aria-hidden="true"></div>
-
-  <div class="mobile-menu" id="mmenu" role="dialog" aria-modal="true" aria-label="Menu">
-    <button type="button" class="menu-close" data-action="close-menu" aria-label="Close menu">&#10005;</button>
-    <a href="services.html">Find Your Style</a>
-    <a href="booking.html">Booking</a>
-    <a href="care/aftercare.html">After Care</a>
-    <a href="visit-us.html">Find Us</a>
-    <a href="index.html#contact">Contact</a>
-    <span class="mm-group">Appearance</span>
-    <div class="theme-switch" role="group" aria-label="Colour theme">
-      <button type="button" class="theme-pill" data-theme-set="dark" aria-pressed="true">Dark</button>
-      <button type="button" class="theme-pill" data-theme-set="light" aria-pressed="false">Light</button>
-    </div>
-    <button class="btn btn-gold mm-book" type="button" data-book="">Book an appointment</button>
-  </div>
 </header>
+
+<!-- The drawer and its backdrop MUST stay outside <header>.
+     The header has backdrop-filter, which makes it the containing block for any
+     position:fixed descendant — nested in there, the drawer's top:0/bottom:0
+     resolved against the 71px header instead of the viewport, so it opened
+     ~100px tall and showed one link at a time. -->
+<div class="menu-backdrop" id="menu-backdrop" data-action="close-menu" aria-hidden="true"></div>
+
+<div class="mobile-menu" id="mmenu" role="dialog" aria-modal="true" aria-label="Menu">
+  <button type="button" class="menu-close" data-action="close-menu" aria-label="Close menu">&#10005;</button>
+  <a href="services.html">Find Your Style</a>
+  <a href="booking.html">Booking</a>
+  <a href="care/aftercare.html">After Care</a>
+  <a href="visit-us.html">Find Us</a>
+  <a href="index.html#contact">Contact</a>
+  <span class="mm-group">Appearance</span>
+  <div class="theme-switch" role="group" aria-label="Colour theme">
+    <button type="button" class="theme-pill" data-theme-set="dark" aria-pressed="true">Dark</button>
+    <button type="button" class="theme-pill" data-theme-set="light" aria-pressed="false">Light</button>
+  </div>
+  <button class="btn btn-gold mm-book" type="button" data-book="">Book an appointment</button>
+</div>
 <!-- @/header -->
 
 <main id="main">
