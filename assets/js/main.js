@@ -395,8 +395,44 @@ function resetModalForm(kind) {
   document.getElementById('m-submit').disabled = false;
   setModalAudience(kind);
 }
+/* ---------- Calendly ----------
+   Booking runs through Calendly. The buttons are unchanged — every [data-book]
+   still opens "a booking thing", it is just Calendly's popup now instead of the
+   built-in form. The form stays in the page as the fallback for when Calendly
+   is blocked or unconfigured, and it is still what stylist applications use. */
+function calendlyUrl(service) {
+  let url = CONFIG.bookingUrl;
+  if (!url) return '';
+
+  const p = new URLSearchParams();
+  // Calendly themes the scheduler from the URL, so it can follow Dark/Light
+  // instead of dropping a bright white panel onto the dark site.
+  const light = document.documentElement.dataset.theme === 'light';
+  p.set('background_color', light ? 'FBF4EA' : '180E1A');
+  p.set('text_color',       light ? '2E1528' : 'F3EBE3');
+  p.set('primary_color',    light ? '8C601F' : 'D9AE62');
+  p.set('hide_gdpr_banner', '1');
+  // Carries the requested service through to the Calendly booking record —
+  // otherwise that context is lost, which the old form used to capture.
+  if (service) p.set('utm_content', service.title);
+
+  return url + (url.includes('?') ? '&' : '?') + p.toString();
+}
+
 function openBooking(id) {
   const s = serviceById(id);
+
+  if (window.Calendly && CONFIG.bookingUrl) {
+    Calendly.initPopupWidget({ url: calendlyUrl(s) });
+    return;
+  }
+  // Calendly blocked, still loading, or no link configured — use the built-in
+  // enquiry form rather than leaving the button doing nothing.
+  openEnquiryForm(s);
+}
+
+/* The original in-page booking form, now the fallback path. */
+function openEnquiryForm(s) {
   const known = !!s;
   document.getElementById('m-title').textContent = known ? 'Book ' + s.title : 'Book an appointment';
   document.getElementById('m-sub').textContent = known
@@ -601,14 +637,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Booking widget, only once a URL is configured. An empty iframe would render
-  // as a broken frame, so the on-page booking options stay until it is set.
+  // Inline scheduler on the booking page. Calendly's script picks up
+  // .calendly-inline-widget on load, so the container just needs to exist.
   const embed = document.getElementById('booking-embed');
-  if (embed && CONFIG.bookingEmbedUrl) {
-    embed.innerHTML = '<iframe src="' + CONFIG.bookingEmbedUrl + '" title="Book an appointment" loading="lazy"></iframe>';
+  if (embed && CONFIG.bookingUrl && CONFIG.bookingEmbedInline) {
+    embed.innerHTML = '<div class="calendly-inline-widget" data-url="' + calendlyUrl(null) +
+                      '" style="min-width:320px;height:700px"></div>';
     embed.hidden = false;
-    const manual = document.getElementById('booking-manual');
-    if (manual) manual.hidden = true;
+    // The manual contact options stay: some people would rather message than
+    // pick a slot, and they are the fallback if Calendly fails to load.
+    const heading = document.getElementById('booking-manual-heading');
+    if (heading) heading.hidden = false;
   }
 
   // Social links appear only once a real handle is configured — an icon that
@@ -618,7 +657,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (url) { el.href = url; el.hidden = false; }
   });
 
-  // CONFIG-driven links (each already has a working WhatsApp fallback href)
-  document.querySelectorAll('[data-booking-link]').forEach(el => { if (CONFIG.bookingUrl) el.href = CONFIG.bookingUrl; });
+  // "Book online" links open the same Calendly popup rather than navigating
+  // away; they keep their WhatsApp href as the no-JS fallback.
+  document.querySelectorAll('[data-booking-link]').forEach(el => {
+    if (!CONFIG.bookingUrl) return;
+    el.href = CONFIG.bookingUrl;
+    el.removeAttribute('target');
+    el.addEventListener('click', e => {
+      if (!window.Calendly) return;   // let the plain link through instead
+      e.preventDefault();
+      Calendly.initPopupWidget({ url: calendlyUrl(serviceById(document.body.dataset.service)) });
+    });
+  });
   document.querySelectorAll('[data-complaints]').forEach(el => { if (CONFIG.complaintsFormUrl) el.href = CONFIG.complaintsFormUrl; });
 });

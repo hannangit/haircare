@@ -172,11 +172,32 @@ This site was built as a working shell. None of the following is real:
 - [ ] **Deposit amount** (£20) and cancellation window (48 hours)
 - [ ] **Company number and NHBF membership number** in `partials/footer.html`
 - [ ] **Salon photography** — every listing uses a generated placeholder
-- [ ] **Formspree endpoint** in `config.js` (the booking form currently shows a
-      demo confirmation and sends nothing)
-- [ ] **Booking system link** in `config.js` — "Book online" falls back to
-      WhatsApp until `bookingUrl` is set; set `bookingEmbedUrl` too and the
-      widget replaces the manual options on `book-appointment.html`
+- [ ] **Calendly account** — `bookingUrl` in `config.js` points at a personal
+      scheduling link (`calendly.com/hannanahmad12-i4z0`). Swap it for the
+      salon's own, and set the event name, duration and availability there.
+- [ ] **Formspree endpoint** in `config.js` — used by the stylist application
+      form and the booking fallback; both show a demo confirmation until it is set
+
+## Booking
+
+Every `[data-book]` button opens **Calendly** as a popup, and
+`book-appointment.html` shows the same scheduler inline. The buttons themselves
+are ordinary site buttons — nothing about their markup or styling is
+Calendly-specific, so the booking provider can be swapped without touching them.
+
+- The link lives in `CONFIG.bookingUrl`. Blank it out and every button falls
+  back to the built-in enquiry form, which still works end to end.
+- `calendlyUrl()` in `main.js` builds the URL: it passes the salon's colours so
+  the scheduler follows Dark/Light, and appends the chosen service as
+  `utm_content` so that context reaches the Calendly booking record.
+- The fallback also fires automatically if Calendly is blocked or has not
+  finished loading, so a button never does nothing.
+- The in-page form is still the *only* path for **stylist applications**
+  (`data-action="open-stylist"`) — that is not a client booking and does not go
+  through Calendly.
+- `assets.calendly.com` is loaded on every page (`widget.css` + `widget.js`).
+  To avoid the third-party request on pages nobody books from, load it lazily on
+  first click instead.
 
 ## Layout
 

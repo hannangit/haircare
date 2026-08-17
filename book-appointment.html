@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
 <script>try{if(localStorage.getItem("ahc-theme")==="light")document.documentElement.dataset.theme="light";}catch(e){}</script>
 </head>
 <body>
@@ -96,15 +97,17 @@
 <section class="block">
   <div class="wrap">
 
-    <!-- Filled in by main.js once CONFIG.bookingEmbedUrl is set -->
+    <!-- Calendly inline scheduler, injected by main.js so the URL and its theme
+         colours come from config rather than being hardcoded in the markup. -->
     <div class="form-embed" id="booking-embed" hidden></div>
 
     <div id="booking-manual">
+      <div class="rule-labeled" id="booking-manual-heading" hidden>Or get in touch</div>
       <div class="pathway-grid">
         <div class="pathway">
-          <h3>Request a slot online</h3>
-          <p>The quickest way. Pick your service, tell us when suits, and we will reply with real times — usually the same day.</p>
-          <button class="btn btn-black u-full" type="button" data-book="">Open the booking form</button>
+          <h3>Pick a slot online</h3>
+          <p>The quickest way — choose a time that suits you and it's confirmed straight away, no waiting for a reply.</p>
+          <button class="btn btn-black u-full" type="button" data-book="">Open the scheduler</button>
         </div>
         <div class="pathway">
           <h3>Message or call us</h3>
@@ -121,7 +124,7 @@
         <ul>
           <li>Some services need a <a href="booking.html#patch">patch test 48 hours beforehand</a> — relaxers, lash extensions, tints and bonded installs.</li>
           <li>Long styles need a long slot. Knotless braids and faux locs run five to six hours, so weekend spaces go early.</li>
-          <li>Nothing is charged when you send the request. The £20 deposit is taken only once we have agreed a time.</li>
+          <li>Nothing is charged when you book. We take the £20 deposit separately once your slot is confirmed.</li>
         </ul>
       </div>
     </div>
@@ -325,6 +328,7 @@
 <script src="assets/js/icons.js"></script>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/services-data.js"></script>
+<script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>

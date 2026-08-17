@@ -1099,3 +1099,13 @@ section.block--flush-top{padding-top:0}
 .guide-media-ph span{font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;line-height:1.5}
 .guide-media figcaption{font-size:.74rem;color:var(--color-ink-secondary);opacity:.75;margin-top:8px;text-align:center}
 .guide-media-body > :first-child{margin-top:0}
+
+/* ---------- Calendly ----------
+   The widget's wrappers are created in our own document, so they can be themed
+   here; the scheduler itself is a cross-origin iframe and is themed through the
+   colour params built in calendlyUrl(). Giving the iframe element a background
+   stops it flashing white while the booking page loads. */
+.calendly-overlay{background:var(--scrim)!important}
+.calendly-popup-content iframe,
+.calendly-inline-widget iframe{background:var(--color-ink-800)}
+.calendly-inline-widget{min-height:700px}

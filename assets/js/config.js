@@ -7,13 +7,14 @@ const CONFIG = {
   //    Until this is set, the booking form shows a demo confirmation and sends nothing.
   formspreeEndpoint: 'https://formspree.io/f/YOUR_FORM_ID',
 
-  // 2. Paste your live booking link here (Fresha, Treatwell, Booksy, Calendly…).
-  //    Every "Book now" button falls back to WhatsApp until this is filled in.
-  bookingUrl: '',
+  // 2. Calendly scheduling link. Every "Book" button opens this as a popup; the
+  //    booking page shows it inline. Blank it out and the whole site falls back
+  //    to the built-in enquiry form, which still works.
+  bookingUrl: 'https://calendly.com/hannanahmad12-i4z0',
 
-  // 3. Optional: the embeddable version of the same booking system, shown in an
-  //    iframe on book-appointment.html. Leave blank to show the contact card instead.
-  bookingEmbedUrl: '',
+  // 3. Show the scheduler inline on book-appointment.html as well as in popups.
+  //    Set false to leave that page as contact options only.
+  bookingEmbedInline: true,
 
   // 4. Optional: a form for aftercare questions or complaints (Google Forms, Typeform…).
   complaintsFormUrl: '',
