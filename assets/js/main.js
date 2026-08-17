@@ -160,14 +160,9 @@ function initTicker() {
   const track = document.getElementById('ticker-track');
   if (!track || typeof TICKER_MESSAGES === 'undefined') return;
 
-  const today = OPENING_HOURS[(new Date().getDay() + 6) % 7];
-  const items = [
-    today.hours === 'Closed'
-      ? '<b>Closed today</b> — book online any time'
-      : '<b>Open today</b> ' + today.hours,
-    ...TICKER_MESSAGES
-  ];
-  const group = items.map(m => '<span class="ticker-item">' + m + '</span>').join('');
+  // Offers only. Opening hours live on Find Us and in the footer, where someone
+  // looking for them can actually read them rather than wait for a loop.
+  const group = TICKER_MESSAGES.map(m => '<span class="ticker-item">' + m + '</span>').join('');
 
   track.innerHTML = group + '<span aria-hidden="true">' + group + '</span>';
   document.getElementById('ticker').hidden = false;
@@ -195,6 +190,27 @@ function initConsult() {
   try { stored = localStorage.getItem('ahc-consult'); } catch (e) { /* private mode */ }
   // Default to collapsed: an offer that covers content unasked is an annoyance.
   setConsult(stored !== 'open');
+}
+
+/* ---------- Back to top ----------
+   Only appears once there is something to scroll back from. */
+function initToTop() {
+  const btn = document.querySelector('.to-top');
+  if (!btn) return;
+  const toggle = () => btn.classList.toggle('is-visible', window.scrollY > 600);
+  toggle();
+  window.addEventListener('scroll', toggle, { passive: true });
+  // A page opened at an #anchor, or restored mid-page on a back navigation,
+  // is already scrolled before any scroll event fires.
+  window.addEventListener('load', toggle);
+}
+function scrollToTop() {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  // Send focus back to the top of the document, or a keyboard user is left
+  // stranded at the bottom of the tab order.
+  const first = document.querySelector('.skip-link');
+  if (first) first.focus({ preventScroll: true });
 }
 
 /* ---------- ServiceCard — the single card component used everywhere ---------- */
@@ -536,6 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initHours();
   initTicker();
   initConsult();
+  initToTop();
   initCategories();
   initSearch();
   initServicePicker();
@@ -551,7 +568,8 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'clear-filters': clearFilters(); break;
       case 'open-stylist':  openStylist(); break;
       case 'consult-collapse': setConsult(true); break;
-      case 'consult-expand':   setConsult(false); break;
+      case "consult-expand":   setConsult(false); break;
+      case "to-top":           scrollToTop(); break;
     }
   });
 

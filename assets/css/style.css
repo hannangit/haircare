@@ -482,7 +482,7 @@ section.block{padding:var(--space-section) 0}
 .guide-section p{font-size:.94rem;color:var(--color-ink-secondary);line-height:1.75;margin-bottom:.9rem}
 .guide-section p:last-child{margin-bottom:0}
 .guide-section ul,.guide-section ol{padding-left:22px;margin:12px 0;font-size:.94rem;color:var(--color-ink-secondary);line-height:1.85}
-.guide-section .report{font-size:.9rem;color:var(--color-ink-primary);background:var(--tint-accent);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:14px 18px;margin-top:16px;display:flex;align-items:center;gap:10px;line-height:1.6}
+.guide-section .report{font-size:.9rem;color:var(--color-ink-primary);background:var(--tint-accent);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:14px 18px;margin-top:16px;line-height:1.7}
 .guide-section .report a{color:var(--color-accent);font-weight:600}
 .guide-sub{margin-top:14px}
 /* Numbered licence clauses */
@@ -1043,3 +1043,54 @@ section.block--flush-top{padding-top:0}
    section collapsing while the third-party script is still loading. */
 .reviews-embed{min-height:220px}
 .reviews-embed iframe{max-width:100%;border:0}
+
+/* The book icon is the primary action in the floating column, so it carries the
+   gold rather than sitting flat with the contact icons. */
+.social-icon--cta{color:var(--color-gold);border-color:var(--color-gold)}
+.social-icon--cta:hover{background:var(--color-action);color:var(--color-on-action);border-color:var(--color-action)}
+
+/* ---------- Back to top ----------
+   Bottom-right, which is free on desktop now the WhatsApp button only shows on
+   narrow screens; above it on mobile. Hidden until there is something to
+   scroll back from. */
+.to-top{
+  position:fixed;right:24px;bottom:24px;z-index:var(--z-social);
+  width:46px;height:46px;display:grid;place-items:center;
+  border-radius:50%;
+  background:var(--color-surface);
+  backdrop-filter:blur(10px) saturate(140%);
+  -webkit-backdrop-filter:blur(10px) saturate(140%);
+  border:1px solid var(--color-border-hover);
+  color:var(--color-ink-primary);
+  box-shadow:var(--shadow-subtle);
+  cursor:pointer;
+  opacity:0;visibility:hidden;transform:translateY(10px);
+  transition:opacity .25s ease,transform .25s ease,visibility .25s,background .2s ease,color .2s ease,border-color .2s ease;
+}
+.to-top.is-visible{opacity:1;visibility:visible;transform:none}
+.to-top:hover{background:var(--tint-accent-strong);border-color:var(--color-gold);color:var(--color-gold)}
+.to-top:focus-visible{outline:2px solid var(--color-gold);outline-offset:3px}
+/* Clear the WhatsApp button, which returns to this corner below 769px. */
+@media(max-width:768px){.to-top{bottom:84px;right:18px}}
+
+/* ---------- Aftercare page: photo slots ----------
+   One image per section. The placeholder is sized so the real photograph can
+   drop straight in: replace .guide-media-ph with <img> and nothing else moves. */
+@media(min-width:760px){
+  .guide-section--media{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:30px;align-items:start}
+}
+.guide-media{margin:0 0 18px}
+@media(min-width:760px){.guide-media{margin:0}}
+.guide-media img,.guide-media-ph{
+  width:100%;aspect-ratio:4/3;border-radius:var(--radius-md);display:block;object-fit:cover;
+}
+.guide-media-ph{
+  display:grid;place-items:center;gap:10px;padding:18px;text-align:center;
+  background:var(--tint-1);
+  border:1px dashed var(--color-border-hover);
+  color:var(--color-ink-secondary);
+}
+.guide-media-ph svg{color:var(--color-gold)}
+.guide-media-ph span{font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;line-height:1.5}
+.guide-media figcaption{font-size:.74rem;color:var(--color-ink-secondary);opacity:.75;margin-top:8px;text-align:center}
+.guide-media-body > :first-child{margin-top:0}
