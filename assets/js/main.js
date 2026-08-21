@@ -140,14 +140,14 @@ function initIcons() {
 }
 
 /* ---------- Opening hours (rendered wherever [data-hours] appears) ---------- */
-function initHours() {
+function renderHours() {
   const targets = document.querySelectorAll('[data-hours]');
   if (!targets.length) return;
   // getDay() is Sunday-first; OPENING_HOURS is Monday-first.
   const todayIndex = (new Date().getDay() + 6) % 7;
   const rows = OPENING_HOURS.map((h, i) => `<div class="hours-row${i === todayIndex ? ' is-today' : ''}">
-      <span class="hours-day">${h.day}${i === todayIndex ? ' <span class="hours-today">Today</span>' : ''}</span>
-      <span class="hours-time${h.hours === 'Closed' ? ' is-closed' : ''}">${h.hours}</span>
+      <span class="hours-day">${window.AHC ? AHC.escHtml(h.day) : h.day}${i === todayIndex ? ' <span class="hours-today">Today</span>' : ''}</span>
+      <span class="hours-time${h.hours === "Closed" ? " is-closed" : ""}">${window.AHC ? AHC.escHtml(h.hours) : h.hours}</span>
     </div>`).join('');
   targets.forEach(el => { el.innerHTML = rows; });
 }
@@ -156,7 +156,7 @@ function initHours() {
    The track holds the message list twice: the keyframe translates -50%, which
    lands exactly on the start of the second copy, so the loop has no visible
    seam. The duplicate is aria-hidden so it isn't read out twice. */
-function initTicker() {
+function renderTicker() {
   const track = document.getElementById('ticker-track');
   if (!track || typeof TICKER_MESSAGES === 'undefined') return;
 
@@ -213,9 +213,13 @@ function scrollToTop() {
   if (first) first.focus({ preventScroll: true });
 }
 
-/* ---------- ServiceCard — the single card component used everywhere ---------- */
+/* ---------- ServiceCard — the single card component used everywhere ----------
+   There are no per-service detail pages any more: the card carries the full
+   description, and anything beyond that is an enquiry. Every sheet-sourced
+   value is escaped — a spreadsheet cell must not contribute markup. */
 function ServiceCard(s) {
-  const href = rootPath('services/' + s.id + '.html');
+  const esc = window.AHC ? AHC.escHtml : (v => v);
+  const escA = window.AHC ? AHC.escAttr : (v => v);
 
   // Only facts that vary between services. "Free consultation" is true of
   // everything on the menu, so putting it on every card carries no signal.
@@ -227,27 +231,33 @@ function ServiceCard(s) {
     { on: s.patchTest, label: 'Patch test needed', warn: true }
   ].filter(b => b.on);
 
+  // === null, not truthiness: a £0 service is a real price and must render as
+  // "Free", not fall through to "On request".
+  const hasPrice = priceOf(s) !== null;
+  const priceLabel = !hasPrice ? 'On request' : (s.price === 0 ? 'Free' : money(s.price));
+
   return `<article class="prop">
-    <a href="${href}" tabindex="-1" aria-hidden="true">
-      <div class="ph">
-        <img src="${s.images[0]}" alt="${s.alt}" loading="lazy">
-        <span class="roomtype">${s.category}</span>
-      </div>
-    </a>
+    <div class="ph">
+      <img src="${escA(s.images[0])}" alt="${escA(s.alt)}" loading="lazy">
+      <span class="roomtype">${esc(s.category)}</span>
+    </div>
     <div class="body">
-      <h4><a href="${href}">${s.title}</a></h4>
-      <div class="meta">${s.description ? s.description.split('. ')[0] + '.' : s.category}</div>
+      <h4>${esc(s.title)}</h4>
+      <div class="meta">${esc(s.description || s.category)}</div>
       <div class="price-row">
-        <span class="amount${priceOf(s) ? '' : ' amount--tbc'}">${priceOf(s) ? money(s.price) : 'On request'}</span>
-        ${priceOf(s) ? '<span class="per">from</span>' : ''}
+        <span class="amount${hasPrice && s.price !== 0 ? '' : ' amount--tbc'}">${esc(priceLabel)}</span>
+        ${hasPrice && s.price !== 0 ? '<span class="per">from</span>' : ''}
       </div>
-      <div class="avail">${icon('clock', 14)}${durationText(s)}</div>
+      <div class="avail">${icon('clock', 14)}${esc(durationText(s))}</div>
       ${badges.length ? `<ul class="amenity-list">
-        ${badges.map(b => `<li${b.warn ? ' class="warn"' : ''}>${b.label}</li>`).join('')}
+        ${badges.map(b => `<li${b.warn ? ' class="warn"' : ''}>${esc(b.label)}</li>`).join('')}
       </ul>` : ''}
+      ${s.feats && s.feats.length ? `<div class="detail-feats">
+        ${s.feats.map(f => `<span>${esc(f)}</span>`).join('')}
+      </div>` : ''}
       <div class="actions">
-        <a class="btn btn-outline btn-sm" href="${href}">Details</a>
-        <button class="btn btn-gold btn-sm" type="button" data-book="${s.id}">Book</button>
+        <button class="btn btn-outline btn-sm" type="button" data-enquire="${escA(s.id)}">Enquire</button>
+        <button class="btn btn-gold btn-sm" type="button" data-book="${escA(s.id)}">Book</button>
       </div>
     </div>
   </article>`;
@@ -256,14 +266,15 @@ function ServiceCard(s) {
 /* ---------- Category tiles (homepage) ----------
    The homepage advertises the kinds of work we do, not individual line items;
    each tile deep-links into the menu with the Category filter already applied. */
-function initCategories() {
+function renderCategories() {
   const el = document.getElementById('categories');
   if (!el) return;
+  const esc = window.AHC ? AHC.escHtml : (v => v);
   el.innerHTML = categoryList().map(c => {
     const n = categoryCount(c.name);
     return `<a class="cat-tile" href="${rootPath('services.html')}?category=${encodeURIComponent(c.name)}">
-      <span class="cat-tile-name">${c.name}</span>
-      <span class="cat-tile-blurb">${c.blurb}</span>
+      <span class="cat-tile-name">${esc(c.name)}</span>
+      <span class="cat-tile-blurb">${esc(c.blurb)}</span>
       <span class="cat-tile-foot">
         <span class="cat-tile-sub">${n} ${n === 1 ? 'service' : 'services'}</span>
         <span class="cat-tile-go" aria-hidden="true">→</span>
@@ -314,33 +325,45 @@ function clearFilters() {
   document.getElementById('f-extra').value = '';
   applyFilters();
 }
-function initSearch() {
+/* Bound ONCE. Kept separate from rendering so that re-rendering after the sheet
+   arrives cannot attach a second copy of every listener. */
+function bindSearch() {
+  const grid = document.getElementById('grid');
+  if (!grid) return;
+  document.querySelectorAll('[data-filter]').forEach(el => el.addEventListener('change', applyFilters));
+  const searchBtn = document.querySelector('[data-action="search"]');
+  if (searchBtn) searchBtn.addEventListener('click', applyFilters);
+}
+
+/* Safe to call repeatedly. Rebuilds the category options from the live data,
+   preserving whatever the visitor had chosen. */
+function renderSearch() {
   const grid = document.getElementById('grid');
   if (!grid) return;
 
-  // A filter with no data behind it can only ever return nothing, so hide it
-  // until the corresponding fields are populated in services-data.js.
+  const catEl = document.getElementById('f-category');
+  if (catEl) {
+    // Rebuilding a <select> wipes the current choice, so capture and restore it.
+    const wanted = catEl.value || new URLSearchParams(location.search).get('category') || '';
+    const esc = window.AHC ? AHC.escHtml : (v => v);
+    catEl.innerHTML = '<option value="">All services</option>' +
+      categoryList().map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+    if (wanted && [...catEl.options].some(o => o.value === wanted)) catEl.value = wanted;
+  }
+
+  // A filter with nothing behind it can only ever return nothing, so it hides.
+  // Deliberately tolerant: one blank cell in a new row used to remove an entire
+  // filter site-wide, so a filter now survives as long as SOME row can use it.
   const filterFields = { 'f-category': 'category', 'f-price': 'price', 'f-duration': 'duration' };
   Object.entries(filterFields).forEach(([id, field]) => {
     const el = document.getElementById(id);
     if (!el) return;
+    const usable = SERVICES.some(s => s[field] !== null && s[field] !== undefined);
     const group = el.closest('.control-group');
-    if (group) group.hidden = !hasFilterableData(field);
+    if (group) group.hidden = !usable;
   });
 
-  document.querySelectorAll('[data-filter]').forEach(el => el.addEventListener('change', applyFilters));
-  const searchBtn = document.querySelector('[data-action="search"]');
-  if (searchBtn) searchBtn.addEventListener('click', applyFilters);
-
-  // Deep link from a homepage category tile: /services.html?category=Braids
-  const category = new URLSearchParams(location.search).get('category');
-  const catEl = document.getElementById('f-category');
-  if (category && catEl && [...catEl.options].some(o => o.value === category)) {
-    catEl.value = category;
-    applyFilters();
-    return;
-  }
-  renderGrid(SERVICES);
+  applyFilters();
 }
 
 /* ---------- Modal: booking (client) and chair application (stylist) ---------- */
@@ -460,19 +483,167 @@ function openStylist() {
 }
 
 /* Populate the service picker from the menu, so it can never drift out of date. */
-function initServicePicker() {
+function bindServicePicker() {
   const pick = document.getElementById('m-service-pick');
   if (!pick) return;
-  pick.innerHTML = '<option value="">Not sure yet — help me choose</option>' +
-    categoryList().map(c => `<optgroup label="${c.name}">` +
-      SERVICES.filter(s => s.category === c.name)
-        .map(s => `<option value="${s.id}">${s.title} — ${priceText(s)}</option>`).join('') +
-      '</optgroup>').join('');
   // Keep the hidden field (used for the payload) in step with the visible picker.
   pick.addEventListener('change', () => {
     document.getElementById('m-service').value = pick.value || 'general-booking';
   });
 }
+function renderServicePicker() {
+  const pick = document.getElementById('m-service-pick');
+  if (!pick) return;
+  const esc = window.AHC ? AHC.escHtml : (v => v);
+  const keep = pick.value;                       // survive a re-render mid-enquiry
+  pick.innerHTML = '<option value="">Not sure yet — help me choose</option>' +
+    categoryList().map(c => `<optgroup label="${esc(c.name)}">` +
+      SERVICES.filter(s => s.category === c.name)
+        .map(s => `<option value="${esc(s.id)}">${esc(s.title)} — ${esc(priceText(s))}</option>`).join('') +
+      '</optgroup>').join('');
+  if (keep && [...pick.options].some(o => o.value === keep)) pick.value = keep;
+}
+
+/* ---------- Contact details ----------
+   The markup carries the built-in values as static text (which is also the
+   fallback, and what search engines see); these hooks overwrite them from the
+   live data. One phone number in the sheet, every format derived from it. */
+function renderContact() {
+  const wa = CONFIG.whatsapp || (window.AHC ? AHC.waLink(CONFIG.phone) : '');
+  const tel = CONFIG.phoneHref || (window.AHC ? AHC.telHref(CONFIG.phone) : '');
+  const values = {
+    phone: CONFIG.phone,
+    email: CONFIG.email,
+    emailFeedback: CONFIG.emailFeedback,
+    address: CONFIG.address,
+    companyNo: CONFIG.companyNo,
+    nhbfNo: CONFIG.nhbfNo,
+    insurer: CONFIG.insurer
+  };
+  const hrefs = {
+    phone: tel,
+    email: CONFIG.email ? 'mailto:' + CONFIG.email : '',
+    emailFeedback: CONFIG.emailFeedback ? 'mailto:' + CONFIG.emailFeedback : '',
+    whatsapp: wa,
+    instagram: CONFIG.instagram,
+    maps: typeof mapsLinkUrl === 'function' ? mapsLinkUrl() : ''
+  };
+
+  document.querySelectorAll('[data-contact]').forEach(el => {
+    const v = values[el.dataset.contact];
+    if (v === undefined || v === null || v === '') return;   // blank leaves the built-in text
+    // Address is the one multi-line field. Split on newline only — splitting on
+    // commas would break "Unit 4, Silbury Arcade" across two lines.
+    if (el.dataset.contact === 'address' && String(v).indexOf('\n') !== -1) {
+      el.textContent = '';
+      String(v).split(/\r?\n/).forEach((line, i) => {
+        if (i) el.appendChild(document.createElement('br'));
+        el.appendChild(document.createTextNode(line.trim()));
+      });
+    } else {
+      el.textContent = v;                                    // textContent, never innerHTML
+    }
+  });
+
+  document.querySelectorAll('[data-contact-href]').forEach(el => {
+    const key = el.dataset.contactHref;
+    const v = hrefs[key];
+    // Instagram blank is a deliberate "no icon", so it hides rather than keeping
+    // a stale link; everything else keeps its built-in href when blank.
+    if (key === 'instagram') {
+      if (v) { el.href = v; el.hidden = false; } else { el.hidden = true; }
+      return;
+    }
+    if (v) el.href = v;
+  });
+
+  const embed = document.querySelector('[data-maps-embed]');
+  if (embed && typeof mapEmbedUrl === 'function') embed.src = mapEmbedUrl();
+}
+
+/* ---------- Team ----------
+   team.html has no server-rendered cards any more; the built-in TEAM array is
+   the fallback and the sheet overrides it. */
+function renderTeam() {
+  const leadEl = document.getElementById('team-lead');
+  const gridEl = document.getElementById('team-grid');
+  if (!leadEl && !gridEl) return;
+  if (typeof TEAM === 'undefined' || !TEAM.length) return;
+
+  const esc = window.AHC ? AHC.escHtml : (v => v);
+  const escA = window.AHC ? AHC.escAttr : (v => v);
+  const initials = n => n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+  const links = m => {
+    const out = [];
+    if (m.phone) out.push(`<a href="${escA(window.AHC ? AHC.telHref(m.phone) : 'tel:' + m.phone)}" aria-label="Call ${escA(m.name)}">Call</a>`);
+    if (m.email) out.push(`<a href="mailto:${escA(m.email)}" aria-label="Email ${escA(m.name)}">Email</a>`);
+    return out.length ? `<div class="team-links">${out.join('')}</div>` : '';
+  };
+
+  const lead = TEAM.filter(m => m.lead);
+  const rest = TEAM.filter(m => !m.lead);
+
+  if (leadEl) {
+    leadEl.innerHTML = lead.map(m => `<div class="team-card team-card--lead">
+      <div class="team-avatar" aria-hidden="true">${esc(initials(m.name))}</div>
+      <div class="team-lead-body">
+        <h4>${esc(m.name)}</h4>
+        <div class="team-role">${esc(m.role)}</div>
+        ${m.area ? `<div class="team-area">${esc(m.area)}</div>` : ''}
+        ${m.quote ? `<p class="team-quote">&ldquo;${esc(m.quote)}&rdquo;</p>` : ''}
+        ${links(m)}
+      </div>
+    </div>`).join('');
+  }
+  if (gridEl) {
+    gridEl.innerHTML = rest.map(m => `<div class="team-card">
+      <div class="team-avatar" aria-hidden="true">${esc(initials(m.name))}</div>
+      <h4>${esc(m.name)}</h4>
+      <div class="team-role">${esc(m.role)}</div>
+      ${m.area ? `<div class="team-area">${esc(m.area)}</div>` : ''}
+      ${links(m)}
+    </div>`).join('');
+  }
+}
+
+/* ---------- Editable copy ----------
+   Small pieces of business wording the owner can change without touching code.
+   Blank in the sheet keeps whatever the markup already says. */
+function renderCopy() {
+  const map = {
+    'intro-text': CONFIG.introText,
+    'consult-title': CONFIG.consultTitle,
+    'consult-body': CONFIG.consultBody,
+    'consult-cta': CONFIG.consultCta,
+    'chair-rent': CONFIG.chairRent
+  };
+  document.querySelectorAll('[data-copy]').forEach(el => {
+    const v = map[el.dataset.copy];
+    if (v) el.textContent = v;
+  });
+  document.querySelectorAll('[data-deposit]').forEach(el => {
+    if (SERVICE_DEFAULTS.deposit !== null && SERVICE_DEFAULTS.deposit !== undefined) {
+      el.textContent = money(SERVICE_DEFAULTS.deposit);
+    }
+  });
+}
+
+/* ---------- One render pass ----------
+   Everything below is safe to call repeatedly: it only writes markup, never
+   binds a listener. data.js calls this again once live data lands. */
+function renderAll() {
+  renderContact();
+  renderCopy();
+  renderHours();
+  renderTicker();
+  renderCategories();
+  renderSearch();
+  renderServicePicker();
+  renderTeam();
+  initIcons();          // re-scan: freshly rendered markup contains data-icon
+}
+window.AHC_RENDER = renderAll;
 
 function setFieldError(inputId, message) {
   const input = document.getElementById(inputId);
@@ -585,18 +756,28 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initIcons();
   initTabs();
-  initHours();
-  initTicker();
   initConsult();
   initToTop();
-  initCategories();
-  initSearch();
-  initServicePicker();
+
+  // Bind listeners once...
+  bindSearch();
+  bindServicePicker();
+
+  // ...then render. Cached or built-in data is already on the globals by now,
+  // so the first paint always shows real content - no skeleton needed.
+  renderAll();
 
   // Global click delegation for declarative actions
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-action], [data-book]');
+    const t = e.target.closest("[data-action], [data-book], [data-enquire]");
     if (!t) return;
+    if (t.dataset.enquire !== undefined) {
+      // "Enquire" opens the in-page form, pre-set to this service. There are no
+      // detail pages now, so this is where extra questions go.
+      if (menuIsOpen()) setMenu(false);
+      openEnquiryForm(serviceById(t.dataset.enquire));
+      return;
+    }
     if (t.dataset.book !== undefined) {
       // The drawer's own Book button would otherwise leave the drawer open
       // behind the modal, with both trying to own body.style.overflow.

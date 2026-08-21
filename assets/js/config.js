@@ -27,6 +27,10 @@ const CONFIG = {
   address: 'Unit 4, Silbury Arcade, Central Milton Keynes, MK9 3AG',
   mapsQuery: 'Silbury Arcade, Central Milton Keynes, MK9 3AG',
 
+  // 5. Google Sheets endpoint (Apps Script web app URL). Leave blank and the
+  //    site simply runs on the built-in values below — nothing breaks.
+  sheetEndpoint: '',
+
   // 5. Social. Leave blank and the icon is simply not rendered, rather than
   //    linking somewhere that doesn't exist.
   instagram: ''
@@ -55,3 +59,22 @@ const OPENING_HOURS = [
 
 function mapEmbedUrl() { return 'https://www.google.com/maps?q=' + encodeURIComponent(CONFIG.mapsQuery) + '&output=embed'; }
 function mapsLinkUrl() { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(CONFIG.mapsQuery); }
+
+/* ─── Team ────────────────────────────────────────────────────────────────
+   Rendered onto team.html. `lead: true` gets the wide owner card at the top;
+   everyone else lands in the grid below, in `sort` order. */
+const TEAM = [
+  { name: 'Ijeoma Balogun', role: 'Owner & Senior Braider', area: 'Knotless braids · Fulani · Boho',
+    quote: 'I opened this salon because I got tired of watching people leave with headaches and thinner edges than they came in with. Tension is a skill, not an accident.',
+    phone: '+44 7700 900123', email: 'ijeoma@africanhaircare.co.uk', lead: true, sort: 1 },
+  { name: 'Nkechi Mensah', role: 'Loc Technician', area: 'Starter locs · Retwists · Repairs',
+    quote: '', phone: '+44 7700 900124', email: 'nkechi@africanhaircare.co.uk', lead: false, sort: 2 },
+  { name: 'Shanice Baptiste', role: 'Natural Hair Specialist', area: 'Silk press · Trims · Scalp care',
+    quote: '', phone: '+44 7700 900125', email: 'shanice@africanhaircare.co.uk', lead: false, sort: 3 },
+  { name: 'Fatou Diallo', role: 'Weave & Wig Specialist', area: 'Sew-ins · Frontals · Wig revamps',
+    quote: '', phone: '+44 7700 900126', email: 'fatou@africanhaircare.co.uk', lead: false, sort: 4 },
+  { name: 'Priya Anand', role: 'Beauty Therapist', area: 'Lashes · Brows · Threading · Makeup',
+    quote: '', phone: '+44 7700 900127', email: 'priya@africanhaircare.co.uk', lead: false, sort: 5 },
+  { name: 'Tolu Adeyemi', role: 'Braider & Apprentice Lead', area: "Box braids · Twists · Children's styles",
+    quote: '', phone: '+44 7700 900128', email: 'tolu@africanhaircare.co.uk', lead: false, sort: 6 }
+];

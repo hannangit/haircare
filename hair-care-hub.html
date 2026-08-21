@@ -24,7 +24,7 @@
 </div>
 
 
-<a class="wa" href="https://wa.me/447700900123" target="_blank" rel="noopener" aria-label="Message African Hair Care on WhatsApp">
+<a class="wa" data-contact-href="whatsapp" href="https://wa.me/447700900123" target="_blank" rel="noopener" aria-label="Message African Hair Care on WhatsApp">
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
     <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94
              1.16-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2
@@ -212,16 +212,16 @@
         <li><a href="team.html">Our Stylists</a></li>
         <li><a href="stylists.html">Work With Us</a></li>
         <li><a href="index.html#reviews">Reviews</a></li>
-        <li><a href="tel:+447700900123">+44 7700 900123</a></li>
-        <li><a href="mailto:hello@africanhaircare.co.uk">hello@africanhaircare.co.uk</a><br><span class="foot-note">General enquiries</span></li>
-        <li><a href="mailto:feedback@africanhaircare.co.uk">feedback@africanhaircare.co.uk</a><br><span class="foot-note">Feedback &amp; complaints</span></li>
+        <li><a data-contact-href="phone" data-contact="phone" href="tel:+447700900123">+44 7700 900123</a></li>
+        <li><a data-contact-href="email" data-contact="email" href="mailto:hello@africanhaircare.co.uk">hello@africanhaircare.co.uk</a><br><span class="foot-note">General enquiries</span></li>
+        <li><a data-contact-href="emailFeedback" data-contact="emailFeedback" href="mailto:feedback@africanhaircare.co.uk">feedback@africanhaircare.co.uk</a><br><span class="foot-note">Feedback &amp; complaints</span></li>
       </ul></div>
     </div>
     <div class="footer-legal">
-      <p>African Hair Care Ltd — Company No: [00000000]</p>
-      <p>Unit 4, Silbury Arcade, Central Milton Keynes, MK9 3AG</p>
-      <p>NHBF membership No: [000000]</p>
-      <p>Salon insurance held with [insurer]</p>
+      <p>African Hair Care Ltd — Company No: <span data-contact="companyNo">[00000000]</span></p>
+      <p data-contact="address">Unit 4, Silbury Arcade, Central Milton Keynes, MK9 3AG</p>
+      <p>NHBF membership No: <span data-contact="nhbfNo">[000000]</span></p>
+      <p>Salon insurance held with <span data-contact="insurer">[insurer]</span></p>
     </div>
     <div class="foot-bottom"><span class="footer-copyright">Copyright &copy; 2026 African Hair Care Ltd</span></div>
   </div>
@@ -232,9 +232,9 @@
      the header; nothing is duplicated here. Hidden at <=768px, where the
      WhatsApp button takes over. -->
 <div class="floating-social-bar" role="group" aria-label="Contact us">
-  <a class="social-icon" data-social="instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram" hidden><span data-icon="instagram" data-icon-size="19"></span></a>
-  <a class="social-icon" href="https://wa.me/447700900123" target="_blank" rel="noopener" aria-label="Message us on WhatsApp"><span data-icon="whatsapp" data-icon-size="19"></span></a>
-  <a class="social-icon" href="tel:+447700900123" aria-label="Call the salon"><span data-icon="phone" data-icon-size="19"></span></a>
+  <a class="social-icon" data-social="instagram" data-contact-href="instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram" hidden><span data-icon="instagram" data-icon-size="19"></span></a>
+  <a class="social-icon" data-contact-href="whatsapp" href="https://wa.me/447700900123" target="_blank" rel="noopener" aria-label="Message us on WhatsApp"><span data-icon="whatsapp" data-icon-size="19"></span></a>
+  <a class="social-icon" data-contact-href="phone" href="tel:+447700900123" aria-label="Call the salon"><span data-icon="phone" data-icon-size="19"></span></a>
   <!-- The only persistent book CTA on desktop, now the header button is gone. -->
   <button class="social-icon social-icon--cta" type="button" data-book="" aria-label="Book an appointment"><span data-icon="calendar" data-icon-size="19"></span></button>
 </div>
@@ -256,8 +256,8 @@
 
   <div class="consult-body" id="consult-body">
     <button class="consult-collapse" type="button" data-action="consult-collapse" aria-label="Collapse this offer">&#8211;</button>
-    <h3>Free Hair Consultation</h3>
-    <p>A free 15-minute texture and style assessment before any appointment — no obligation to book on the day.</p>
+    <h3 data-copy="consult-title">Free Hair Consultation</h3>
+    <p data-copy="consult-body">A free 15-minute texture and style assessment before any appointment — no obligation to book on the day.</p>
     <button class="btn btn-gold btn-sm consult-cta" type="button" data-book="">Book my consultation</button>
   </div>
 </aside>
@@ -369,6 +369,7 @@
 <script src="assets/js/icons.js"></script>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/services-data.js"></script>
+<script src="assets/js/data.js"></script>
 <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 <script src="assets/js/main.js"></script>
 </body>

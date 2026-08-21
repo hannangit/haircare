@@ -1,0 +1,8 @@
+key,value,active
+deposit,20,TRUE
+cancellation_hours,48,TRUE
+chair_rent_weekly,130,TRUE
+consult_title,Free Hair Consultation,TRUE
+consult_body,A free 15-minute texture and style assessment before any appointment - no obligation to book on the day.,TRUE
+consult_cta,Book my consultation,TRUE
+intro_text,"Your crown, in expert hands",TRUE

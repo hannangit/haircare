@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><title>Data layer tests — African Hair Care</title>
+<body style="margin:0;padding:16px;font:12px/1.5 monospace;background:#100810;color:#F3EBE3">
+<h1 style="font:600 16px monospace">Data layer tests</h1>
+<p>Serve the site (<code>bash serve.sh</code>) and open this page. Results appear below.</p>
+<pre id="out">start</pre>
+<script>
+window.onerror = function (m, s, l) {
+  document.getElementById('out').textContent = 'ERROR line ' + l + ': ' + m;
+  return true;
+};
+</script>
+<script src="data-layer.js"></script>

@@ -1,0 +1,69 @@
+{
+  "ok": true,
+  "version": "1",
+  "generated": "2026-08-18T00:00:00.000Z",
+  "warnings": [],
+  "tabs": {
+    "services": [
+      { "id": "fixture-free", "name": "FIXTURE Free Consultation", "category": "FIXTURE Braids",
+        "price": 0, "duration_mins": 15, "hair": null, "patch_test": "FALSE", "kids": "TRUE",
+        "description": "Zero price must render as Free, not On request.",
+        "feats": "Chip one\nChip two", "sort_order": 2 },
+      { "id": "fixture-top", "name": "FIXTURE Sorted First", "category": "FIXTURE Braids",
+        "price": "£42.50", "duration_mins": 90, "hair": "client", "patch_test": "yes", "kids": 0,
+        "description": "Price arrives as a string with a currency symbol.",
+        "feats": "", "sort_order": 1 },
+      { "id": "fixture-newcat", "name": "FIXTURE New Category Item", "category": "FIXTURE Nails",
+        "price": 33, "duration_mins": 45, "hair": "included", "patch_test": "FALSE", "kids": "FALSE",
+        "description": "Category invented in the sheet; the filter must learn it.",
+        "feats": "Only chip", "sort_order": 3 }
+    ],
+    "categories": [
+      { "name": "FIXTURE Nails", "slug": "fixture-nails", "blurb": "Category that does not exist in code.", "sort_order": 2 },
+      { "name": "FIXTURE Braids", "slug": "braids", "blurb": "Braids, from the fixture.", "sort_order": 1 }
+    ],
+    "contact": [
+      { "key": "phone", "value": "+44 (0)7700 900999" },
+      { "key": "email_general", "value": "fixture-hello@example.com" },
+      { "key": "email_feedback", "value": "fixture-feedback@example.com" },
+      { "key": "address", "value": "Unit 9, Fixture House, Testtown, TT1 1TT" },
+      { "key": "maps_query", "value": "Fixture House, Testtown" },
+      { "key": "company_no", "value": "FIXTURE-123" },
+      { "key": "nhbf_no", "value": "FIXTURE-456" },
+      { "key": "insurer", "value": "Fixture Insurance Ltd" },
+      { "key": "instagram_url", "value": "https://instagram.com/fixture" }
+    ],
+    "hours": [
+      { "day": "FIXTURE Monday", "hours": "10:00 - 16:00", "sort_order": 1 },
+      { "day": "FIXTURE Tuesday", "hours": "", "sort_order": 2 },
+      { "day": "FIXTURE Wednesday", "hours": "10:00 - 16:00", "sort_order": 3 },
+      { "day": "FIXTURE Thursday", "hours": "10:00 - 16:00", "sort_order": 4 },
+      { "day": "FIXTURE Friday", "hours": "10:00 - 16:00", "sort_order": 5 },
+      { "day": "FIXTURE Saturday", "hours": "10:00 - 16:00", "sort_order": 6 },
+      { "day": "FIXTURE Sunday", "hours": "Closed", "sort_order": 7 }
+    ],
+    "promos": [
+      { "message": "FIXTURE promo currently running", "link_url": "https://example.com/offer",
+        "start_date": "2020-01-01", "end_date": "2099-12-31", "sort_order": 1 },
+      { "message": "FIXTURE promo that has expired", "link_url": "",
+        "start_date": "2020-01-01", "end_date": "2020-02-01", "sort_order": 2 },
+      { "message": "FIXTURE promo not started yet", "link_url": "",
+        "start_date": "2099-01-01", "end_date": "", "sort_order": 3 }
+    ],
+    "team": [
+      { "name": "FIXTURE Owner", "role": "Fixture Lead", "specialism": "Fixture specialism",
+        "quote": "Quote from the fixture.", "phone": "+44 7700 900999",
+        "email": "fixture-owner@example.com", "is_lead": "TRUE", "sort_order": 1 },
+      { "name": "FIXTURE Stylist", "role": "Fixture Stylist", "specialism": "Fixture area",
+        "quote": "", "phone": "+44 7700 900998", "email": "fixture-stylist@example.com",
+        "is_lead": "FALSE", "sort_order": 2 }
+    ],
+    "settings": [
+      { "key": "deposit", "value": 99 },
+      { "key": "cancellation_hours", "value": 72 },
+      { "key": "consult_title", "value": "FIXTURE Consultation Title" },
+      { "key": "consult_body", "value": "Fixture body copy for the consultation widget." },
+      { "key": "intro_text", "value": "FIXTURE intro text" }
+    ]
+  }
+}

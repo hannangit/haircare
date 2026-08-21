@@ -19,8 +19,8 @@ Then open <http://localhost:8761>.
 
 | What you want to change | Where |
 | --- | --- |
-| Services, prices, durations, aftercare text | `assets/js/services-data.js` |
-| Phone, email, address, opening hours, booking links | `assets/js/config.js` |
+| Services, prices, categories, contact details, hours, offers, team | **Google Sheets** - see below |
+| Those same values when the sheet is unavailable (the fallback) | `assets/js/services-data.js`, `assets/js/config.js` |
 | Header / nav, footer, booking modal | `partials/` — then run `bash build.sh` |
 | Colours, spacing, components | `assets/css/style.css` |
 | Icons | `assets/js/icons.js` |
@@ -78,8 +78,10 @@ background runs to the viewport edge at every width. There is no solid sidebar
 and no `body { padding-left }` — if you find yourself adding one, something has
 gone wrong.
 
-- **Ticker** messages are edited in `config.js` (`TICKER_MESSAGES`); today's
-  opening hours are prepended automatically. The track holds the list twice and
+- **Ticker** messages come from the `promos` tab (fallback: `TICKER_MESSAGES` in
+  `config.js`), and support start/end dates. Offers only - no opening hours.
+  The
+  the track holds the list twice and
   the keyframe translates `-50%`, so the loop wraps with no seam — if you build
   the content by hand, keep the duplicate. It pauses on hover *and* focus.
 - **Floating icons** are contact only — WhatsApp, phone, book, plus Instagram
@@ -108,9 +110,8 @@ Two places are built to be replaced with real images:
    the whole `<div class="hero-veil">…</div>` with an `<img>` or a CSS
    background on `.ghero`.
 2. **Service cards** — `placeholderImage()` in `services-data.js` generates the
-   tinted artwork. Set `images: ['/path/to/photo.jpg', …]` on a service to
-   override it; the first image is the card thumbnail, the next two fill the
-   gallery on the service page.
+   tinted artwork. Set `images` on a service to override it; the first image is
+   the card thumbnail.
 
 ### Shared header / footer / modal
 
@@ -140,22 +141,14 @@ the third form with your repository name, or leave the default relative paths.
 
 ## Service data
 
-`assets/js/services-data.js` holds all 25 services across five categories
-(Braids, Twists &amp; Locs, Weaves &amp; Wigs, Natural Hair, Beauty). Each entry
-carries its price, duration, whether the client brings their own hair, whether a
-patch test is needed, a description, a prep list and an aftercare line — and the
-service pages, the menu grid and the booking modal all read from it.
+There are no per-service detail pages: `services.html` shows the whole menu, with
+the full description on each card, and anything further is an enquiry.
 
-Adding a service takes two steps:
-
-1. Add a `service(...)` entry to `SERVICES`.
-2. Create `services/<id>.html` by copying any existing file in that folder and
-   changing the `<title>`, the meta description and `<body data-service="…">`.
-   Then run `bash build.sh`.
+`assets/js/services-data.js` holds the built-in copy of the menu, used whenever
+the sheet is unavailable. The live menu comes from the `services` tab.
 
 Listing images are generated as inline SVG placeholders tinted by category, so
-nothing ever renders as a broken image. Replace the `images` array on a service
-with real photograph URLs when you have them.
+nothing ever renders as a broken image. Set `images` on a service to override.
 
 ## ⚠ Everything below is placeholder — confirm before go-live
 
@@ -198,6 +191,105 @@ Calendly-specific, so the booking provider can be swapped without touching them.
 - `assets.calendly.com` is loaded on every page (`widget.css` + `widget.js`).
   To avoid the third-party request on pages nobody books from, load it lazily on
   first click instead.
+
+## Editing the site from Google Sheets
+
+Business content lives in a Google Sheet. The owner edits the sheet; the site
+picks the changes up within about 15 minutes with no deploy and no code.
+
+**Nothing breaks if the sheet is unavailable.** Every value has a built-in copy
+in `config.js` / `services-data.js`, so the order of preference is:
+
+1. Live sheet data
+2. Cached sheet data (`localStorage`, 12 minutes)
+3. The built-in values
+
+The cache is applied *synchronously before first paint*, so the page always
+renders real content. There is deliberately no loading state or skeleton
+anywhere — there is never a moment with no data to show.
+
+### One-time setup
+
+1. **Create the sheet.** One tab per file in `seed/`, named exactly:
+   `services`, `categories`, `contact`, `hours`, `promos`, `team`, `settings`.
+   Import each CSV into its tab (File > Import > Upload > *Replace current sheet*).
+   The CSVs contain the site's current values, so importing reproduces it exactly.
+2. **Add the script.** Extensions > Apps Script, delete the placeholder, paste
+   `apps-script/Code.gs`, save.
+3. **Check it before deploying.** In the editor choose `testPayload` and Run,
+   then `testDataQuality`. View > Logs shows row counts and flags likely
+   data-entry mistakes. Fix anything it reports.
+4. **Deploy.** Deploy > New deployment > type *Web app*.
+   - Execute as: **Me**
+   - Who has access: **Anyone** ← if this is wrong the site gets a sign-in *page*
+     instead of data. The site detects this and logs a clear message, but it will
+     not have live data until it is fixed.
+   Copy the `/exec` URL.
+5. **Point the site at it.** Put the URL in `sheetEndpoint` in
+   `assets/js/config.js`, then run `bash build.sh` and publish.
+
+> **Editing the script is not deploying it.** Apps Script keeps serving the old
+> version until you do Deploy > *Manage deployments* > edit > Version: *New
+> version*. This catches everyone once.
+
+### Day-to-day editing
+
+| To do this | Do this |
+| --- | --- |
+| Change a price | Edit `price` in `services`. `0` shows as "Free"; blank shows "On request" |
+| Add a service | New row in `services`. Give it an `id` (lowercase, hyphens), a `name`, and set `active` to TRUE |
+| Hide a service | Set its `active` to FALSE. It is dropped before the page is built, so it never appears in the page source |
+| Reorder | Change `sort_order`. Lowest first |
+| Add a category | New row in `categories`, then use that exact name in the service's `category`. It appears in the filter automatically |
+| Change the phone number | `contact` > `phone`. The dialable link and the WhatsApp link are both derived from it — do not edit them separately |
+| Change opening hours | `hours`. Clearing an `hours` cell marks that day **Closed** |
+| Run an offer | New row in `promos` with `start_date` / `end_date`. Outside that window it hides itself |
+| Change a stylist | `team`. `is_lead` TRUE puts them in the wide card at the top |
+| Change the deposit | `settings` > `deposit` |
+
+**TRUE/FALSE columns**
+
+- `active` — FALSE hides the row completely. Removed server-side, so drafts never
+  reach the published page.
+- `patch_test` — TRUE adds the "Patch test needed" warning to the card.
+- `kids` — TRUE adds "Kids welcome".
+- `is_lead` (team) — TRUE = the owner's wide card.
+
+Accepted forms: `TRUE`/`FALSE`, `yes`/`no`, `1`/`0`. Anything else is treated as
+not-set.
+
+**Things worth knowing**
+
+- **Blank is not always "no value".** A blank `hours` cell means *Closed*. A blank
+  `instagram_url` means *show no Instagram icon*. A blank `hair` means *no
+  extension hair needed*. Blank `price` means *On request* — but `0` means *Free*.
+- **Lists** (`feats`) go one per line inside the cell (Alt+Enter), not
+  comma-separated — commas are common inside the text itself.
+- **Addresses** are split on line breaks only, for the same reason.
+- **Phone format**: `+44 7700 900123` or `07700 900123`. `+44 (0)7700 900123` is
+  handled too.
+- **Private columns are safe.** Only whitelisted columns are published, so you can
+  keep `cost`, `supplier`, `notes` columns in the same tabs and they never reach
+  the website. Add a column to `PUBLISHED` in `Code.gs` before expecting it to appear.
+- **Links must start with `http://` or `https://`.** Anything else is discarded at
+  both ends.
+- **Page titles, meta descriptions and headings stay in the HTML.** The sheet
+  controls business content, not the crawlable skeleton.
+
+### If something looks wrong
+
+Open the browser console. The data layer logs one line saying whether it used
+live, cached or built-in data, and why. `AHC.snapshot()` prints exactly what the
+site is currently using; `AHC.clearCache()` then reload forces a fresh fetch.
+
+Customers never see an error: if the sheet is unreachable the site quietly keeps
+the last good content.
+
+### Tests
+
+Serve the site and open `/tests/` in a browser. 61 assertions cover live-data
+replacement, sorting, filters, contact propagation, promo date windows, malformed
+payloads, injection attempts, and the three failure modes. All should pass.
 
 ## Layout
 

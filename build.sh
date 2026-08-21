@@ -56,7 +56,7 @@ for f in $PAGES; do
 
   # ---- Which primary nav item is current ----
   case "$f" in
-    services.html|services/*)              ACTIVE="services" ;;
+    services.html)                         ACTIVE="services" ;;
     booking.html|book-appointment.html)    ACTIVE="booking" ;;
     care/*|hair-care-hub.html|team.html)   ACTIVE="care" ;;
     stylists.html)                         ACTIVE="work" ;;

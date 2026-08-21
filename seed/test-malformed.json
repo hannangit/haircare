@@ -1,0 +1,46 @@
+{
+  "ok": true,
+  "version": "1",
+  "tabs": {
+    "services": [
+      { "id": null, "name": "No id - must be skipped", "price": 10 },
+      { "id": "no-name", "name": "", "price": 10 },
+      { "id": "bad id with spaces", "name": "Bad id - must be skipped", "price": 10 },
+      { "id": "bad-price", "name": "MALFORMED Bad Price", "category": "Braids",
+        "price": "ninety", "duration_mins": "soon", "description": "Price and duration unreadable.", "sort_order": 1 },
+      { "id": "xss-attempt", "name": "MALFORMED <img src=x onerror=alert(1)>",
+        "category": "<b>Braids</b>", "price": 20, "duration_mins": 30,
+        "description": "<script>alert('xss')</script> tags must be inert.",
+        "feats": "<i>chip</i>", "sort_order": 2 },
+      { "id": "wrong-types", "name": "MALFORMED Wrong Types", "category": "Braids",
+        "price": true, "duration_mins": [], "hair": "banana", "patch_test": "maybe",
+        "kids": {}, "description": 12345, "sort_order": "first" }
+    ],
+    "categories": [
+      { "name": "", "slug": "blank-name" },
+      { "name": "Braids", "slug": "braids", "blurb": "<em>Escaped?</em>", "sort_order": 1 }
+    ],
+    "contact": [
+      { "key": "phone", "value": "+44 (0)7700 900111" },
+      { "key": "instagram_url", "value": "javascript:alert('xss')" },
+      { "key": "booking_url", "value": "data:text/html,<script>alert(1)</script>" },
+      { "key": "email_general", "value": "malformed@example.com" }
+    ],
+    "hours": [],
+    "promos": [
+      { "message": "MALFORMED promo <script>alert(1)</script>", "link_url": "javascript:alert(1)", "sort_order": 1 },
+      { "message": "", "sort_order": 2 },
+      { "message": "MALFORMED bad dates", "start_date": "not-a-date", "end_date": "also-not", "sort_order": 3 }
+    ],
+    "team": [
+      { "name": "", "role": "Skipped" },
+      { "name": "MALFORMED <script>alert(1)</script>", "role": "<b>Role</b>",
+        "specialism": "", "quote": "", "phone": "not a phone", "email": "x@example.com",
+        "is_lead": "TRUE", "sort_order": 1 }
+    ],
+    "settings": [
+      { "key": "deposit", "value": "free" },
+      { "key": "cancellation_hours", "value": null }
+    ]
+  }
+}
