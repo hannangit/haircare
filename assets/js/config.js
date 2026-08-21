@@ -1,44 +1,85 @@
-/* Site-wide configuration. Edit the values below when you have real accounts/links set up.
+/* ═══════════════════════════════════════════════════════════════════════════
+   SITE CONFIG — the only file you edit per business.
 
-   ⚠ Every contact detail here is a PLACEHOLDER. Phone numbers use Ofcom's
-   reserved 07700 900xxx range so nothing can dial a real person by accident. */
+   Everything in CONFIG is a per-business setting. Everything below the
+   BUILT-IN CONTENT line is fallback content, used only when the Google Sheet is
+   unavailable; once the sheet is live, the sheet wins.
+
+   Launching a new site should not require touching any other file.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 const CONFIG = {
-  // 1. Sign up free at https://formspree.io, create a form, and paste its endpoint URL here.
-  //    Until this is set, the booking form shows a demo confirmation and sends nothing.
-  formspreeEndpoint: 'https://formspree.io/f/YOUR_FORM_ID',
 
-  // 2. Calendly scheduling link. Every "Book" button opens this as a popup; the
-  //    booking page shows it inline. Blank it out and the whole site falls back
-  //    to the built-in enquiry form, which still works.
+  /* ── 1. BUSINESS ──────────────────────────────────────────────────────── */
+  businessName: 'African Hair Care',
+
+  /* ── 2. GOOGLE SHEET ──────────────────────────────────────────────────────
+     The Apps Script web app URL (ends /exec). Deploy it with
+     "Who has access: Anyone", or it serves a sign-in page instead of data.
+     Leave blank to run entirely on the built-in content below.              */
+  sheetEndpoint: 'https://script.google.com/macros/s/AKfycbyLhglaNJhbPDWAA8ANeUsmxUE3-tld22-oNvspvTxbajhSIe_svDnkxwbkSG_DDg5T/exec',
+
+  /* ── 3. BOOKING ───────────────────────────────────────────────────────────
+     provider: 'calendly' | 'google' | 'none'
+       calendly — bookingUrl is the calendly.com/... link. Opens as a popup.
+       google   — bookingUrl is a Google Calendar appointment schedule link
+                  (.../appointments/schedules/...). Opens in a new tab and
+                  embeds inline on the booking page.
+       none     — every booking button falls back to WhatsApp.
+     No page markup changes between providers; the scripts load from here.    */
+  bookingProvider: 'calendly',
   bookingUrl: 'https://calendly.com/hannanahmad12-i4z0',
+  bookingEmbedInline: true,          // also show the scheduler on book-appointment.html
 
-  // 3. Show the scheduler inline on book-appointment.html as well as in popups.
-  //    Set false to leave that page as contact options only.
-  bookingEmbedInline: true,
+  /* ── 4. REVIEWS ───────────────────────────────────────────────────────────
+     provider: 'jotform' | 'iframe' | 'none'
+       jotform — reviewsId is the JotForm website-widget ID
+       iframe  — reviewsId is a full https:// URL to embed (Google, Facebook,
+                 Elfsight, Trustpilot — anything that gives you an iframe URL)
+       none    — the reviews section removes itself from the page             */
+  reviewsProvider: 'jotform',
+  reviewsId: '01a00cf8ad38700088a2f53d63cc358f83ae',
 
-  // 4. Optional: a form for aftercare questions or complaints (Google Forms, Typeform…).
-  complaintsFormUrl: '',
-
-  whatsapp: 'https://wa.me/447700900123',
+  /* ── 5. CONTACT ───────────────────────────────────────────────────────────
+     One phone number. The dialable link and the WhatsApp link are both derived
+     from it, so do not write them out separately.
+     Format: '+44 7700 900123' or '07700 900123'.                             */
   phone: '+44 7700 900123',
-  phoneHref: 'tel:+447700900123',
+  whatsappNumber: '',                // blank = use `phone`. Set only if different.
   email: 'hello@africanhaircare.co.uk',
-
+  emailFeedback: 'feedback@africanhaircare.co.uk',
   address: 'Unit 4, Silbury Arcade, Central Milton Keynes, MK9 3AG',
   mapsQuery: 'Silbury Arcade, Central Milton Keynes, MK9 3AG',
+  instagram: '',                     // blank = no Instagram icon is shown
 
-  // 5. Google Sheets endpoint (Apps Script web app URL). Leave blank and the
-  //    site simply runs on the built-in values below — nothing breaks.
-  sheetEndpoint: '',
+  /* ── 6. WHATSAPP MESSAGE ──────────────────────────────────────────────────
+     Pre-filled into every WhatsApp button. {service} becomes the service the
+     visitor was looking at, {business} the business name.                    */
+  whatsappMessage: 'Hi {business}, I would like to ask about {service}.',
 
-  // 5. Social. Leave blank and the icon is simply not rendered, rather than
-  //    linking somewhere that doesn't exist.
-  instagram: ''
+  /* ── 7. LEGAL (footer) ────────────────────────────────────────────────────*/
+  companyNo: '[00000000]',
+  nhbfNo: '[000000]',
+  insurer: '[insurer]',
+
+  /* ── 8. BOOKING NOTICE ────────────────────────────────────────────────────
+     Shown above the booking buttons. Set to '' to hide it.                   */
+  bookingNotice:
+    'Please arrive at your booked start time. The appointment can run longer ' +
+    'than the slot shown, depending on the service. You will receive a ' +
+    'confirmation email, but your booking is only confirmed once payment is ' +
+    'made — the online calendar just shows you our available slots.'
 };
 
-/* Announcement ticker. Each entry becomes one item in the scrolling bar; today's
-   opening hours are prepended automatically. Keep them short — the bar is thin
-   and the loop should stay readable. */
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUILT-IN CONTENT — fallback only.
+   Used before the sheet loads, when it is unreachable, and when no endpoint is
+   configured. Keep it roughly in step with the sheet so the site still reads
+   sensibly if the sheet ever goes down.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Announcement ticker: offers only. The live version comes from the `promos`
+   tab, which also supports start/end dates. */
 const TICKER_MESSAGES = [
   'New client offer — 10% off your first braiding appointment',
   'Free 15-minute consultation with every booking',
@@ -46,7 +87,7 @@ const TICKER_MESSAGES = [
   'Walk-ins welcome for brows, threading and quick treatments'
 ];
 
-/* Opening hours, in one place so the header, footer and Visit Us page agree. */
+/* Opening hours, in one place so the footer and Find Us page agree. */
 const OPENING_HOURS = [
   { day: 'Monday',    hours: 'Closed' },
   { day: 'Tuesday',   hours: '9:00 – 19:00' },
@@ -57,12 +98,7 @@ const OPENING_HOURS = [
   { day: 'Sunday',    hours: '11:00 – 17:00' }
 ];
 
-function mapEmbedUrl() { return 'https://www.google.com/maps?q=' + encodeURIComponent(CONFIG.mapsQuery) + '&output=embed'; }
-function mapsLinkUrl() { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(CONFIG.mapsQuery); }
-
-/* ─── Team ────────────────────────────────────────────────────────────────
-   Rendered onto team.html. `lead: true` gets the wide owner card at the top;
-   everyone else lands in the grid below, in `sort` order. */
+/* Team. `lead: true` gets the wide card at the top of the team page. */
 const TEAM = [
   { name: 'Ijeoma Balogun', role: 'Owner & Senior Braider', area: 'Knotless braids · Fulani · Boho',
     quote: 'I opened this salon because I got tired of watching people leave with headaches and thinner edges than they came in with. Tension is a skill, not an accident.',
@@ -78,3 +114,6 @@ const TEAM = [
   { name: 'Tolu Adeyemi', role: 'Braider & Apprentice Lead', area: "Box braids · Twists · Children's styles",
     quote: '', phone: '+44 7700 900128', email: 'tolu@africanhaircare.co.uk', lead: false, sort: 6 }
 ];
+
+function mapEmbedUrl() { return 'https://www.google.com/maps?q=' + encodeURIComponent(CONFIG.mapsQuery) + '&output=embed'; }
+function mapsLinkUrl() { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(CONFIG.mapsQuery); }

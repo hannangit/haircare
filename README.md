@@ -168,8 +168,6 @@ This site was built as a working shell. None of the following is real:
 - [ ] **Calendly account** — `bookingUrl` in `config.js` points at a personal
       scheduling link (`calendly.com/hannanahmad12-i4z0`). Swap it for the
       salon's own, and set the event name, duration and availability there.
-- [ ] **Formspree endpoint** in `config.js` — used by the stylist application
-      form and the booking fallback; both show a demo confirmation until it is set
 
 ## Booking
 
@@ -191,6 +189,10 @@ Calendly-specific, so the booking provider can be swapped without touching them.
 - `assets.calendly.com` is loaded on every page (`widget.css` + `widget.js`).
   To avoid the third-party request on pages nobody books from, load it lazily on
   first click instead.
+
+> **Launching this template for another business?** See `BLUEPRINT.md` — the
+> step-by-step process, the per-site checklist, and the traps that have already
+> caught us once.
 
 ## Editing the site from Google Sheets
 
@@ -287,9 +289,15 @@ the last good content.
 
 ### Tests
 
-Serve the site and open `/tests/` in a browser. 61 assertions cover live-data
-replacement, sorting, filters, contact propagation, promo date windows, malformed
-payloads, injection attempts, and the three failure modes. All should pass.
+Serve the site, then open:
+
+- `/tests/` — the data layer. 59 assertions: live-data replacement, sorting,
+  filters, contact propagation, promo date windows, malformed payloads,
+  injection attempts, and the three failure modes.
+- `/tests/providers.html` — booking, reviews and WhatsApp. 21 assertions,
+  including switching provider at runtime and refusing unsafe URLs.
+
+All should pass.
 
 ## Layout
 

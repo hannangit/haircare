@@ -391,117 +391,57 @@ function closeModal() {
   if (lastFocusedEl) { lastFocusedEl.focus(); lastFocusedEl = null; }
 }
 
-/* Show only the fields relevant to the current audience. */
-function setModalAudience(kind) {
-  document.querySelectorAll('#m-form [data-audience]').forEach(el => {
-    el.hidden = el.getAttribute('data-audience') !== kind;
-  });
-  const isStylist = kind === 'stylist';
-  document.getElementById('m-submit').textContent = isStylist ? 'Send my application' : 'Request this appointment';
-  document.getElementById('m-message-label').innerHTML = isStylist
-    ? 'Tell us about your work <span class="opt">(optional)</span>'
-    : 'Anything we should know? <span class="opt">(optional)</span>';
-  document.getElementById('m-message').placeholder = isStylist
-    ? 'Where you trained, who you have worked with, the clients you bring…'
-    : 'Hair length, a style reference, allergies, anything you are worried about…';
-  document.getElementById('m-note').innerHTML = isStylist
-    ? '<b>No CV needed to apply.</b><br>We\'ll arrange a call and invite you in to see the space.'
-    : '<b>This is a request, not a confirmed slot.</b><br>We\'ll come back with times that work and take the £' + SERVICE_DEFAULTS.deposit + ' deposit then.';
-}
-function resetModalForm(kind) {
-  document.getElementById('m-form').style.display = 'block';
-  document.getElementById('m-success').style.display = 'none';
-  const err = document.getElementById('m-error');
-  err.style.display = 'none';
-  err.textContent = '';
-  document.querySelectorAll('#m-form .field').forEach(f => f.classList.remove('invalid'));
-  document.getElementById('m-submit').disabled = false;
-  setModalAudience(kind);
-}
-/* ---------- Calendly ----------
-   Booking runs through Calendly. The buttons are unchanged — every [data-book]
-   still opens "a booking thing", it is just Calendly's popup now instead of the
-   built-in form. The form stays in the page as the fallback for when Calendly
-   is blocked or unconfigured, and it is still what stylist applications use. */
-function calendlyUrl(service) {
-  let url = CONFIG.bookingUrl;
-  if (!url) return '';
-
-  const p = new URLSearchParams();
-  // Calendly themes the scheduler from the URL, so it can follow Dark/Light
-  // instead of dropping a bright white panel onto the dark site.
-  const light = document.documentElement.dataset.theme === 'light';
-  p.set('background_color', light ? 'FBF4EA' : '180E1A');
-  p.set('text_color',       light ? '2E1528' : 'F3EBE3');
-  p.set('primary_color',    light ? '8C601F' : 'D9AE62');
-  p.set('hide_gdpr_banner', '1');
-  // Carries the requested service through to the Calendly booking record —
-  // otherwise that context is lost, which the old form used to capture.
-  if (service) p.set('utm_content', service.title);
-
-  return url + (url.includes('?') ? '&' : '?') + p.toString();
-}
-
-function openBooking(id) {
-  const s = serviceById(id);
-
-  if (window.Calendly && CONFIG.bookingUrl) {
-    Calendly.initPopupWidget({ url: calendlyUrl(s) });
-    return;
-  }
-  // Calendly blocked, still loading, or no link configured — use the built-in
-  // enquiry form rather than leaving the button doing nothing.
-  openEnquiryForm(s);
-}
-
-/* The original in-page booking form, now the fallback path. */
-function openEnquiryForm(s) {
-  const known = !!s;
-  document.getElementById('m-title').textContent = known ? 'Book ' + s.title : 'Book an appointment';
-  document.getElementById('m-sub').textContent = known
-    ? [s.category, priceText(s), durationText(s)].filter(Boolean).join(' · ')
-    : 'Tell us what you would like and we will find you a slot.';
-  document.getElementById('m-service').value = known ? s.id : 'general-booking';
-  resetModalForm('client');
-
-  // Pre-select the service so the enquiry arrives with it already filled in.
-  const pick = document.getElementById('m-service-pick');
-  if (pick) pick.value = known ? s.id : '';
-
-  const d = new Date(); d.setDate(d.getDate() + 3);
-  const dateEl = document.getElementById('m-date');
-  dateEl.min = new Date().toISOString().split('T')[0];
-  dateEl.value = d.toISOString().split('T')[0];
-  openModal();
-}
-function openStylist() {
-  document.getElementById('m-title').textContent = 'Work with us';
-  document.getElementById('m-sub').textContent = 'Chair rental · commission · full-time — no agency, no admin';
-  document.getElementById('m-service').value = 'stylist-application';
-  resetModalForm('stylist');
-  openModal();
-}
-
-/* Populate the service picker from the menu, so it can never drift out of date. */
-function bindServicePicker() {
-  const pick = document.getElementById('m-service-pick');
-  if (!pick) return;
-  // Keep the hidden field (used for the payload) in step with the visible picker.
-  pick.addEventListener('change', () => {
-    document.getElementById('m-service').value = pick.value || 'general-booking';
-  });
-}
-function renderServicePicker() {
-  const pick = document.getElementById('m-service-pick');
-  if (!pick) return;
+/* ---------- Booking / enquiry panel ----------
+   One panel, two ways through: message us on WhatsApp, or open the scheduler.
+   Both come from CONFIG via PROVIDERS, so a new site changes config.js only. */
+function openPanel(opts) {
   const esc = window.AHC ? AHC.escHtml : (v => v);
-  const keep = pick.value;                       // survive a re-render mid-enquiry
-  pick.innerHTML = '<option value="">Not sure yet — help me choose</option>' +
-    categoryList().map(c => `<optgroup label="${esc(c.name)}">` +
-      SERVICES.filter(s => s.category === c.name)
-        .map(s => `<option value="${esc(s.id)}">${esc(s.title)} — ${esc(priceText(s))}</option>`).join('') +
-      '</optgroup>').join('');
-  if (keep && [...pick.options].some(o => o.value === keep)) pick.value = keep;
+  const service = opts && opts.service ? opts.service : null;
+  const serviceName = service ? service.title : null;
+
+  document.getElementById('m-title').textContent =
+    (opts && opts.title) || (serviceName ? 'Book ' + serviceName : 'Book an appointment');
+
+  const sub = document.getElementById('m-sub');
+  sub.textContent = (opts && opts.sub) ||
+    (service ? [service.category, priceText(service), durationText(service)].filter(Boolean).join(' · ') : '');
+
+  // The notice is the same on every route, so it lives in config rather than
+  // being repeated in markup.
+  const notice = document.getElementById('m-notice');
+  const noticeText = (opts && opts.notice !== undefined) ? opts.notice : CONFIG.bookingNotice;
+  notice.textContent = noticeText || '';
+  notice.hidden = !noticeText;
+
+  const wa = document.getElementById('m-whatsapp');
+  const waHref = window.PROVIDERS ? PROVIDERS.waLink((opts && opts.waSubject) || serviceName) : '';
+  if (waHref) { wa.href = waHref; wa.hidden = false; } else { wa.hidden = true; }
+
+  const book = document.getElementById('m-book');
+  const hasScheduler = window.PROVIDERS && PROVIDERS.bookingProvider() !== 'none';
+  book.hidden = !hasScheduler || (opts && opts.hideScheduler === true);
+  book.onclick = () => { PROVIDERS.openScheduler(serviceName); };
+
+  document.getElementById('m-note').textContent = (opts && opts.note) || '';
+  openModal();
+  initIcons();
+}
+
+/* Both entry points land on the same panel: "Book" leads with the scheduler,
+   "Enquire" leads with the same options because the answer to "can I ask a
+   question" is also "message us". */
+function openBooking(id) { openPanel({ service: serviceById(id) }); }
+function openEnquiryForm(service) { openPanel({ service: service }); }
+
+function openStylist() {
+  openPanel({
+    title: 'Work with us',
+    sub: 'Chair rental · commission · full-time',
+    notice: '',
+    waSubject: 'renting a chair',
+    hideScheduler: true,
+    note: 'Send us a message and we will arrange a call and a look around.'
+  });
 }
 
 /* ---------- Contact details ----------
@@ -639,7 +579,6 @@ function renderAll() {
   renderTicker();
   renderCategories();
   renderSearch();
-  renderServicePicker();
   renderTeam();
   initIcons();          // re-scan: freshly rendered markup contains data-icon
 }
@@ -660,93 +599,7 @@ function setFieldError(inputId, message) {
   }
   return !message;
 }
-function validateForm(isStylist) {
-  const name = document.getElementById('m-fname').value.trim();
-  const email = document.getElementById('m-email').value.trim();
-  let ok = setFieldError('m-fname', name ? '' : 'Please enter your first name.');
 
-  let emailMsg = '';
-  if (!email) emailMsg = 'Please enter your email address.';
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) emailMsg = 'Please enter a valid email address, like jane@example.com.';
-  ok = setFieldError('m-email', emailMsg) && ok;
-
-  if (isStylist) {
-    const spec = document.getElementById('m-specialism').value.trim();
-    ok = setFieldError('m-specialism', spec ? '' : 'Please tell us what you specialise in.') && ok;
-  }
-  return ok;
-}
-
-async function submitForm(e) {
-  if (e) e.preventDefault();
-  const serviceId = document.getElementById('m-service').value;
-  const isStylist = serviceId === 'stylist-application';
-  const btn = document.getElementById('m-submit');
-  const err = document.getElementById('m-error');
-  err.style.display = 'none';
-
-  if (!validateForm(isStylist)) {
-    const firstInvalid = document.querySelector('#m-form .field.invalid input, #m-form .field.invalid select');
-    if (firstInvalid) firstInvalid.focus();
-    return;
-  }
-
-  const payload = {
-    enquiryType: isStylist ? 'Stylist application' : 'Appointment request',
-    service: serviceId,
-    firstName: document.getElementById('m-fname').value,
-    lastName: document.getElementById('m-lname').value,
-    email: document.getElementById('m-email').value,
-    phone: document.getElementById('m-phone').value,
-    message: document.getElementById('m-message').value
-  };
-  if (isStylist) {
-    payload.specialism = document.getElementById('m-specialism').value;
-    payload.experience = document.getElementById('m-experience').value;
-    payload.portfolio = document.getElementById('m-portfolio').value;
-  } else {
-    payload.preferredDate = document.getElementById('m-date').value;
-    payload.preferredTime = document.getElementById('m-time').value;
-  }
-
-  if (!CONFIG.formspreeEndpoint || CONFIG.formspreeEndpoint.includes('YOUR_FORM_ID')) {
-    showSuccess(isStylist); // no live backend configured yet
-    return;
-  }
-
-  const original = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Sending…';
-  try {
-    const res = await fetch(CONFIG.formspreeEndpoint, {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error('Form submission failed');
-    showSuccess(isStylist);
-  } catch (_) {
-    err.innerHTML = 'Something went wrong sending that. Please try again, or message us on <a href="' + CONFIG.whatsapp + '" target="_blank" rel="noopener">WhatsApp</a>.';
-    err.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = original;
-  }
-}
-function showSuccess(isStylist) {
-  document.getElementById('m-form').style.display = 'none';
-  document.getElementById('m-success').style.display = 'block';
-  document.getElementById('m-success-title').textContent = isStylist ? 'Application sent' : 'Request sent';
-  document.getElementById('m-success-txt').textContent = isStylist
-    ? 'Thanks — your details are on their way to us.'
-    : 'Thanks — your appointment request is on its way.';
-  document.getElementById('m-success-next').innerHTML = isStylist
-    ? 'We\'ll call you within a few days and invite you in to see the salon and meet the team.'
-    : 'We\'ll confirm a time with you and take the <b>£' + SERVICE_DEFAULTS.deposit + ' deposit</b> then. Nothing is charged now.';
-  const cta = document.getElementById('m-success-cta');
-  cta.textContent = isStylist ? 'Read about working with us →' : 'See how booking works →';
-  cta.href = rootPath(isStylist ? 'stylists.html' : 'booking.html');
-  document.getElementById('m-close').focus();
-}
 
 /* ---------- Page init ---------- */
 document.addEventListener('DOMContentLoaded', () => {
@@ -761,7 +614,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Bind listeners once...
   bindSearch();
-  bindServicePicker();
 
   // ...then render. Cached or built-in data is already on the globals by now,
   // so the first paint always shows real content - no skeleton needed.
@@ -805,7 +657,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (m) {
     m.addEventListener('click', e => { if (e.target === m) closeModal(); });
     document.getElementById('m-close').addEventListener('click', closeModal);
-    document.getElementById('m-form').addEventListener('submit', submitForm);
     document.addEventListener('keydown', e => {
       if (m.hidden) return;
       if (e.key === 'Escape') { closeModal(); return; }
@@ -818,17 +669,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Inline scheduler on the booking page. Calendly's script picks up
-  // .calendly-inline-widget on load, so the container just needs to exist.
-  const embed = document.getElementById('booking-embed');
-  if (embed && CONFIG.bookingUrl && CONFIG.bookingEmbedInline) {
-    embed.innerHTML = '<div class="calendly-inline-widget" data-url="' + calendlyUrl(null) +
-                      '" style="min-width:320px;height:700px"></div>';
-    embed.hidden = false;
-    // The manual contact options stay: some people would rather message than
-    // pick a slot, and they are the fallback if Calendly fails to load.
-    const heading = document.getElementById('booking-manual-heading');
-    if (heading) heading.hidden = false;
+  // Inline scheduler and reviews, both provider-driven from config.
+  if (window.PROVIDERS) {
+    PROVIDERS.renderInlineScheduler();
+    PROVIDERS.renderReviews();
   }
 
   // Social links appear only once a real handle is configured — an icon that
@@ -838,16 +682,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (url) { el.href = url; el.hidden = false; }
   });
 
-  // "Book online" links open the same Calendly popup rather than navigating
-  // away; they keep their WhatsApp href as the no-JS fallback.
-  document.querySelectorAll('[data-booking-link]').forEach(el => {
-    if (!CONFIG.bookingUrl) return;
-    el.href = CONFIG.bookingUrl;
-    el.removeAttribute('target');
-    el.addEventListener('click', e => {
-      if (!window.Calendly) return;   // let the plain link through instead
+  // "Book online" links open the scheduler rather than navigating away.
+  document.querySelectorAll("[data-booking-link]").forEach(el => {
+    el.addEventListener("click", e => {
+      if (!window.PROVIDERS || PROVIDERS.bookingProvider() === "none") return;
       e.preventDefault();
-      Calendly.initPopupWidget({ url: calendlyUrl(serviceById(document.body.dataset.service)) });
+      PROVIDERS.openScheduler(null);
     });
   });
   document.querySelectorAll('[data-complaints]').forEach(el => { if (CONFIG.complaintsFormUrl) el.href = CONFIG.complaintsFormUrl; });

@@ -305,10 +305,10 @@ async function withPayload(src, url) {
 
     d.querySelector('[data-enquire]').click();
     await new Promise(r => setTimeout(r, 200));
-    chk('Enquire opens the in-page form', !d.getElementById('modal').hidden);
-    chk('form pre-selects the service',
-        d.getElementById('m-service').value === d.querySelector('[data-enquire]').dataset.enquire,
-        d.getElementById('m-service').value);
+    chk("Enquire opens the booking panel", !d.getElementById("modal").hidden);
+    chk("panel offers WhatsApp with the service prefilled",
+        /Knotless%20Box%20Braids|Knotless+Box+Braids/.test(d.getElementById("m-whatsapp").getAttribute("href") || ""),
+        decodeURIComponent((d.getElementById("m-whatsapp").getAttribute("href") || "").split("text=")[1] || ""));
     d.getElementById('m-close').click();
 
     const bookBtns = d.querySelectorAll('[data-book]');

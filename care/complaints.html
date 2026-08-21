@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
-<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
 <script>try{if(localStorage.getItem("ahc-theme")==="light")document.documentElement.dataset.theme="light";}catch(e){}</script>
 </head>
 <body>
@@ -265,96 +264,22 @@
         <h3 id="m-title">Book an appointment</h3>
         <div class="psub" id="m-sub"></div>
       </div>
-      <button type="button" class="x" id="m-close" aria-label="Close form">&#10005;</button>
+      <button type="button" class="x" id="m-close" aria-label="Close">&#10005;</button>
     </div>
     <div class="modal-bd">
-      <form id="m-form" novalidate>
-        <div class="form-error" id="m-error" role="alert"></div>
-
-        <div class="form-row">
-          <div class="field">
-            <label for="m-fname">First name <span class="req">*</span></label>
-            <input id="m-fname" name="firstName" type="text" autocomplete="given-name" required aria-describedby="m-fname-err">
-            <p class="field-err" id="m-fname-err"></p>
-          </div>
-          <div class="field">
-            <label for="m-lname">Last name <span class="opt">(optional)</span></label>
-            <input id="m-lname" name="lastName" type="text" autocomplete="family-name">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="field">
-            <label for="m-email">Email <span class="req">*</span></label>
-            <input id="m-email" name="email" type="email" autocomplete="email" required aria-describedby="m-email-err">
-            <p class="field-err" id="m-email-err"></p>
-          </div>
-          <div class="field">
-            <label for="m-phone">Phone <span class="opt">(optional)</span></label>
-            <input id="m-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
-          </div>
-        </div>
-
-        <!-- Clients booking an appointment. The service list is built from
-             services-data.js by initServicePicker(), so it can never drift. -->
-        <div class="field" data-audience="client">
-          <label for="m-service-pick">Service</label>
-          <select id="m-service-pick" name="serviceName"></select>
-        </div>
-        <div class="form-row" data-audience="client">
-          <div class="field">
-            <label for="m-date">Preferred date <span class="opt">(optional)</span></label>
-            <input type="date" id="m-date" name="preferredDate">
-          </div>
-          <div class="field">
-            <label for="m-time">Preferred time <span class="opt">(optional)</span></label>
-            <select id="m-time" name="preferredTime">
-              <option value="">Any time</option>
-              <option>Morning (from 9am)</option>
-              <option>Afternoon (from 12pm)</option>
-              <option>Late afternoon (from 3pm)</option>
-              <option>Evening (from 5pm)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Stylists applying for a chair -->
-        <div class="field" data-audience="stylist" hidden>
-          <label for="m-specialism">What do you specialise in? <span class="req">*</span></label>
-          <input id="m-specialism" name="specialism" type="text" aria-describedby="m-specialism-err" placeholder="Knotless braids, locs, lashes…">
-          <p class="field-err" id="m-specialism-err"></p>
-        </div>
-        <div class="form-row" data-audience="stylist" hidden>
-          <div class="field">
-            <label for="m-experience">Years of experience <span class="opt">(optional)</span></label>
-            <select id="m-experience" name="experience">
-              <option value="">Select…</option>
-              <option>Less than 1</option><option>1–3</option><option>3–5</option><option>5–10</option><option>10+</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="m-portfolio">Instagram or portfolio <span class="opt">(optional)</span></label>
-            <input id="m-portfolio" name="portfolio" type="text" inputmode="url" placeholder="@yourhandle">
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="m-message" id="m-message-label">Anything we should know? <span class="opt">(optional)</span></label>
-          <textarea id="m-message" name="message" rows="2"></textarea>
-        </div>
-
-        <input type="hidden" id="m-service">
-        <button class="btn btn-black u-full" id="m-submit" type="submit">Request this appointment</button>
-        <p class="note" id="m-note"></p>
-      </form>
-
-      <div class="success" id="m-success" role="status">
-        <div class="tick">&#10003;</div>
-        <h3 id="m-success-title">Request sent</h3>
-        <p id="m-success-txt"></p>
-        <p id="m-success-next"></p>
-        <a class="btn btn-outline btn-sm u-mt-14" id="m-success-cta" href="../booking.html">See how booking works &rarr;</a>
+      <!-- No form, no form backend. Two ways through: message us, or pick a
+           slot. Both are configured in config.js, so a new site changes the
+           number and the booking link and nothing else. -->
+      <p class="booking-notice" id="m-notice"></p>
+      <div class="action-grid">
+        <a class="btn btn-gold u-full" id="m-whatsapp" href="#" target="_blank" rel="noopener">
+          <span data-icon="whatsapp" data-icon-size="18"></span> Message us on WhatsApp
+        </a>
+        <button class="btn btn-outline u-full" type="button" id="m-book">
+          <span data-icon="calendar" data-icon-size="18"></span> See available slots
+        </button>
       </div>
+      <p class="note" id="m-note"></p>
     </div>
   </div>
 </div>
@@ -362,9 +287,9 @@
 
 <script src="../assets/js/icons.js"></script>
 <script src="../assets/js/config.js"></script>
+<script src="../assets/js/providers.js"></script>
 <script src="../assets/js/services-data.js"></script>
 <script src="../assets/js/data.js"></script>
-<script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 <script src="../assets/js/main.js"></script>
 </body>
 </html>
