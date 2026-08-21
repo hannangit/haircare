@@ -110,18 +110,21 @@
 
     if (p === 'calendly') {
       loadCalendly().then(function (ok) {
-        if (!ok) return;                                  // manual options stay
-        host.innerHTML = '<div class="calendly-inline-widget" data-url="' +
-          esc(calendlyUrl(null)) + '" style="min-width:320px;height:700px"></div>';
+        if (!ok) return;                     // the manual contact options stay
+        host.innerHTML = '';
         host.hidden = false;
-        if (window.Calendly && Calendly.initInlineWidgets) Calendly.initInlineWidgets();
+        // Calendly expands to fit unless its parent has a height of its own.
+        host.style.height = '700px';
+        // The API is initInlineWidget (SINGULAR) and takes parentElement.
+        // Calendly only auto-scans for .calendly-inline-widget at its own load
+        // time, so an element injected after that must be initialised by hand.
+        window.Calendly.initInlineWidget({ url: calendlyUrl(null), parentElement: host });
         showManualHeading();
       });
       return;
     }
     if (p === 'google') {
       var src = CONFIG.bookingUrl;
-      // Google's schedule pages embed with ?gv=true
       if (src.indexOf('gv=true') === -1) src += (src.indexOf('?') !== -1 ? '&' : '?') + 'gv=true';
       host.innerHTML = '<iframe src="' + esc(src) + '" title="Book an appointment" ' +
         'style="border:0;width:100%;height:700px" frameborder="0"></iframe>';

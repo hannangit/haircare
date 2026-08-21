@@ -16,6 +16,23 @@ reviews widget or a service, stop — that value belongs in `config.js` or in th
 sheet. Everything else in the repo is shared machinery and should stay identical
 across all sites, so fixes and improvements can be copied between them.
 
+## Why there is a sheet at all
+
+`config.js` and the sheet answer two different questions, for two different people.
+
+- **`config.js` — you, once, at launch.** Wiring that never changes again: which
+  Apps Script endpoint, which booking provider, which reviews widget. Changing it
+  means editing a file, rebuilding and redeploying.
+- **The sheet — the owner, forever.** Everything that actually moves: prices,
+  services, opening hours, this month's offer, who works there, the deposit. They
+  edit a spreadsheet on their phone and the site follows, with no developer, no
+  git, no deploy.
+
+Without the sheet, every "can you put the price up to £85" is a support ticket for
+you — across a hundred sites, that is the whole business model gone. The built-in
+content in `config.js` and `services-data.js` is only a safety net for the seconds
+before the sheet loads, and for the day Google has an outage.
+
 ---
 
 ## Step 1 — Copy the folder
@@ -30,22 +47,55 @@ Open the folder in Claude Code and say what the business is. Design tweaks
 (palette, wording, which pages exist) are a conversation; the plumbing below
 does not change.
 
-## Step 2 — Create the Google Sheet
+## Step 2 — Create the Google Sheet (the script builds it for you)
 
-1. New Google Sheet. Create **7 tabs**, named exactly:
-   `services`, `categories`, `contact`, `hours`, `promos`, `team`, `settings`
-2. Import each CSV from `seed/` into its matching tab
-   (*File → Import → Upload → Replace current sheet*).
-3. Edit the rows for the new business. Keep the header row exactly as-is.
+1. New blank Google Sheet. Name it `<Business> — Website Content`.
+2. **Extensions → Apps Script**, delete the placeholder, paste **all** of
+   `apps-script/Code.gs`, save.
+3. In the toolbar pick **`setupSheet`** and press **Run**. Approve the
+   permission prompt once. It creates all seven tabs — headers, hover notes
+   explaining every column, TRUE/FALSE dropdowns, frozen header row — plus one
+   example row per tab showing the expected format.
+4. Replace the example rows with the real business content.
+
+`setupSheet` is safe to re-run: a tab that already exists is skipped, never
+overwritten.
+
+> Prefer to start from a full salon's worth of content rather than one example
+> row? Import the matching file from `seed/` into each tab instead
+> (*File → Import → Upload → Replace current sheet*). That reproduces this
+> site's 25 services exactly.
+
+### The seven tabs
+
+| Tab | One row per | Key columns |
+|---|---|---|
+| `services` | service | `name`, `category`, `price`, `duration_mins`, `description`, `feats`, `active` |
+| `categories` | filter group | `name` (must match `services.category` exactly), `slug`, `blurb` |
+| `contact` | detail | `key`, `value` — `phone`, `email_general`, `address`, `maps_query`, … |
+| `hours` | day | `day`, `hours` (**blank = Closed**), `sort_order` |
+| `promos` | ticker message | `message`, `start_date`, `end_date` — dates schedule offers |
+| `team` | staff member | `name`, `role`, `specialism`, `is_lead` |
+| `settings` | site value | `key`, `value` — `deposit`, `cancellation_hours`, consultation copy |
+
+Rules that apply everywhere:
+
+- **`active = FALSE` hides the row** without deleting it. The Apps Script drops
+  those rows before the JSON leaves Google, so drafts never reach the page source.
+- **Blank is meaningful.** Blank `hours` = Closed. Blank `price` = "On request".
+  `0` = "Free". Blank `instagram_url` = hide the icon.
+- **Lists go one line per item inside the cell** (Alt+Enter), never comma-separated.
+- **Never rename a header or a `key`.** The site looks them up by name.
+- Extra columns are ignored, so private working columns (cost, supplier, notes)
+  can live in the same tab and will never be published.
 
 ## Step 3 — Publish the sheet
 
-1. **Extensions → Apps Script**, delete the placeholder, paste `apps-script/Code.gs`, save.
-2. Run **`testPayload`**, then **`testDataQuality`** (View → Logs). Fix anything flagged.
-3. **Deploy → New deployment → Web app**
+1. Back in Apps Script (the same project from step 2), run **`testPayload`**, then **`testDataQuality`** (View → Logs). Fix anything flagged.
+2. **Deploy → New deployment → Web app**
    - Execute as: **Me**
    - Who has access: **Anyone** ← the single most common mistake
-4. Copy the `/exec` URL.
+3. Copy the `/exec` URL.
 
 > **Verify before moving on:** paste the URL into a browser. You should see raw
 > JSON starting `{"ok":true`. If you see a Google **sign-in page**, access is not
@@ -153,8 +203,8 @@ loading spinner anywhere.
 
 ```
 [ ] Folder copied, git re-initialised
-[ ] Sheet created, 7 tabs, CSVs imported and edited
-[ ] Code.gs pasted, testPayload + testDataQuality run clean
+[ ] Sheet created, Code.gs pasted, setupSheet run, content filled in
+[ ] testPayload + testDataQuality run clean
 [ ] Deployed as web app, access = Anyone, /exec returns {"ok":true
 [ ] config.js filled in (13 settings)
 [ ] bash build.sh

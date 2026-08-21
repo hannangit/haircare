@@ -286,3 +286,199 @@ function testPreview() {
     Logger.log(JSON.stringify(p.tabs[t].slice(0, 3), null, 2));
   });
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   SETUP — run this ONCE, on a brand-new empty spreadsheet.
+
+   In the Apps Script toolbar choose `setupSheet` and press Run. It builds
+   all seven tabs: header row, a note on every header explaining what that
+   column does, TRUE/FALSE dropdowns, a frozen header, sensible column
+   widths, and one clearly-fake example row showing the expected format.
+
+   Safe to re-run. A tab that already exists is left completely alone, so
+   this can never overwrite the owner's data.
+   ════════════════════════════════════════════════════════════════════════ */
+
+var SCHEMA = {
+  services: {
+    headers: ['id', 'name', 'category', 'price', 'duration_mins', 'hair',
+              'patch_test', 'kids', 'description', 'feats', 'sort_order', 'active'],
+    notes: {
+      id: 'Unique. lowercase-with-hyphens, e.g. box-braids. Never reuse an id.',
+      name: 'Shown on the card. Required.',
+      category: 'Must match a name in the categories tab EXACTLY, or this service appears under no filter.',
+      price: 'Number only, e.g. 75. Blank shows "On request". 0 shows "Free".',
+      duration_mins: 'Whole minutes, e.g. 90. Displayed as "1 hr 30 mins".',
+      hair: 'included = we supply the hair / client = they bring their own / blank = not applicable.',
+      patch_test: 'TRUE adds a "Patch test needed" line to the card.',
+      kids: 'TRUE adds "Kids welcome".',
+      description: 'One short paragraph. Shown in full on the card.',
+      feats: 'Short bullet chips. ONE PER LINE inside the cell (Alt+Enter). Not comma-separated.',
+      sort_order: 'Display order, lowest number first.',
+      active: 'FALSE removes this service from the website.'
+    },
+    example: ['box-braids', 'Box Braids', 'Braids', 75, 270, 'client', 'FALSE', 'FALSE',
+              'The classic. Clean square partings and a long-lasting finish.',
+              'Small, medium or large\nShoulder to waist length', 1, 'TRUE'],
+    bools: ['patch_test', 'kids', 'active']
+  },
+
+  categories: {
+    headers: ['name', 'slug', 'blurb', 'sort_order', 'active'],
+    notes: {
+      name: 'Exactly as typed in the services tab. Appears in the filter dropdown.',
+      slug: 'lowercase-with-hyphens. Used for the colour accent.',
+      blurb: 'One line, shown on the homepage category tile.',
+      sort_order: 'Display order, lowest first.',
+      active: 'FALSE hides the category.'
+    },
+    example: ['Braids', 'braids', 'Knotless, box, cornrows and Fulani styles.', 1, 'TRUE'],
+    bools: ['active']
+  },
+
+  contact: {
+    headers: ['key', 'value', 'active'],
+    notes: {
+      key: 'Do NOT rename or delete these keys. The website looks them up by name.',
+      value: 'The value shown on the site. Blank is allowed and usually hides that item.',
+      active: 'FALSE ignores this row.'
+    },
+    rows: [
+      ['phone', '+44 7700 900123', 'TRUE'],
+      ['email_general', 'hello@example.co.uk', 'TRUE'],
+      ['email_feedback', 'feedback@example.co.uk', 'TRUE'],
+      ['address', 'Unit 4, Example Street, Town, AB1 2CD', 'TRUE'],
+      ['maps_query', 'Example Street, Town, AB1 2CD', 'TRUE'],
+      ['whatsapp_number', '', 'TRUE'],
+      ['instagram_url', '', 'TRUE'],
+      ['booking_url', '', 'TRUE'],
+      ['company_no', '', 'TRUE'],
+      ['nhbf_no', '', 'TRUE'],
+      ['insurer', '', 'TRUE']
+    ],
+    bools: ['active']
+  },
+
+  hours: {
+    headers: ['day', 'hours', 'sort_order', 'active'],
+    notes: {
+      day: 'Monday, Tuesday, and so on.',
+      hours: 'e.g. 9:00 - 19:00. LEAVE BLANK to show that day as Closed.',
+      sort_order: 'Monday = 1 through Sunday = 7.',
+      active: 'FALSE removes the row entirely.'
+    },
+    rows: [
+      ['Monday', '', 1, 'TRUE'],
+      ['Tuesday', '9:00 - 19:00', 2, 'TRUE'],
+      ['Wednesday', '9:00 - 19:00', 3, 'TRUE'],
+      ['Thursday', '9:00 - 20:00', 4, 'TRUE'],
+      ['Friday', '9:00 - 20:00', 5, 'TRUE'],
+      ['Saturday', '8:00 - 19:00', 6, 'TRUE'],
+      ['Sunday', '11:00 - 17:00', 7, 'TRUE']
+    ],
+    bools: ['active']
+  },
+
+  promos: {
+    headers: ['message', 'link_url', 'start_date', 'end_date', 'sort_order', 'active'],
+    notes: {
+      message: 'One line for the scrolling offers bar at the top of every page.',
+      link_url: 'Optional. Must start with https:// or it is ignored.',
+      start_date: 'Optional, YYYY-MM-DD. Hidden before this date.',
+      end_date: 'Optional, YYYY-MM-DD. Hidden after this date. This is how you schedule an offer.',
+      sort_order: 'Display order.',
+      active: 'FALSE hides it whatever the dates say.'
+    },
+    example: ['10% off your first appointment', '', '', '', 1, 'TRUE'],
+    bools: ['active']
+  },
+
+  team: {
+    headers: ['name', 'role', 'specialism', 'quote', 'phone', 'email',
+              'is_lead', 'sort_order', 'active'],
+    notes: {
+      name: 'Full name. The initials become the avatar.',
+      role: 'e.g. Senior Stylist.',
+      specialism: 'Short list, e.g. Braids / Locs / Silk press.',
+      quote: 'Optional. Only shown on the lead card.',
+      phone: 'Optional.',
+      email: 'Optional.',
+      is_lead: 'TRUE gives the wide card at the top. Normally just the owner.',
+      sort_order: 'Display order.',
+      active: 'FALSE hides them.'
+    },
+    example: ['Jane Doe', 'Owner & Senior Stylist', 'Braids / Locs',
+              'Why I opened the salon.', '+44 7700 900123', 'jane@example.co.uk',
+              'TRUE', 1, 'TRUE'],
+    bools: ['is_lead', 'active']
+  },
+
+  settings: {
+    headers: ['key', 'value', 'active'],
+    notes: {
+      key: 'Do NOT rename or delete these keys.',
+      value: 'The value used on the site.',
+      active: 'FALSE ignores this row.'
+    },
+    rows: [
+      ['deposit', 20, 'TRUE'],
+      ['cancellation_hours', 48, 'TRUE'],
+      ['chair_rent_weekly', '', 'TRUE'],
+      ['consult_title', 'Free Consultation', 'TRUE'],
+      ['consult_body', 'A free 15-minute assessment before any appointment.', 'TRUE'],
+      ['consult_cta', 'Book my consultation', 'TRUE'],
+      ['intro_text', '', 'TRUE']
+    ],
+    bools: ['active']
+  }
+};
+
+function setupSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var made = [], skipped = [];
+
+  Object.keys(SCHEMA).forEach(function (name) {
+    if (ss.getSheetByName(name)) { skipped.push(name); return; }
+
+    var def = SCHEMA[name];
+    var cols = def.headers.length;
+    var sh = ss.insertSheet(name);
+
+    sh.getRange(1, 1, 1, cols).setValues([def.headers])
+      .setFontWeight('bold').setBackground('#241429').setFontColor('#F3EBE3');
+
+    def.headers.forEach(function (h, i) {
+      if (def.notes && def.notes[h]) sh.getRange(1, i + 1).setNote(def.notes[h]);
+    });
+
+    var body = def.rows || (def.example ? [def.example] : []);
+    if (body.length) sh.getRange(2, 1, body.length, cols).setValues(body);
+
+    (def.bools || []).forEach(function (col) {
+      var i = def.headers.indexOf(col);
+      if (i === -1) return;
+      var rule = SpreadsheetApp.newDataValidation()
+        .requireValueInList(['TRUE', 'FALSE'], true)
+        .setAllowInvalid(false)
+        .build();
+      sh.getRange(2, i + 1, 500).setDataValidation(rule);
+    });
+
+    sh.setFrozenRows(1);
+    sh.getRange(1, 1, sh.getMaxRows(), cols).setFontFamily('Arial');
+    for (var c = 1; c <= cols; c++) sh.setColumnWidth(c, 170);
+    var di = def.headers.indexOf("description");
+    if (di !== -1) sh.setColumnWidth(di + 1, 340);   // prose needs the room
+
+    made.push(name);
+  });
+
+  // A brand-new spreadsheet arrives with an empty "Sheet1" that is only noise.
+  var blank = ss.getSheetByName('Sheet1');
+  if (blank && ss.getSheets().length > 1 && blank.getLastRow() === 0) ss.deleteSheet(blank);
+
+  Logger.log('Created: %s', made.length ? made.join(', ') : '(none)');
+  Logger.log('Already existed, left alone: %s', skipped.length ? skipped.join(', ') : '(none)');
+  Logger.log('Next: run testPayload, then testDataQuality, then Deploy as a web app');
+  Logger.log('with "Who has access: Anyone".');
+}
