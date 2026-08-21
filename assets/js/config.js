@@ -11,7 +11,7 @@
 const CONFIG = {
 
   /* ── 1. BUSINESS ──────────────────────────────────────────────────────── */
-  businessName: 'African Hair Care',
+  businessName: 'Shadai African Hair Care',
 
   /* ── 2. GOOGLE SHEET ──────────────────────────────────────────────────────
      The Apps Script web app URL (ends /exec). Deploy it with
@@ -44,9 +44,9 @@ const CONFIG = {
      One phone number. The dialable link and the WhatsApp link are both derived
      from it, so do not write them out separately.
      Format: '+44 7700 900123' or '07700 900123'.                             */
-  phone: '+44 7700 900123',
+  phone: '+44 7700 911111',
   whatsappNumber: '',                // blank = use `phone`. Set only if different.
-  email: 'hello@africanhaircare.co.uk',
+  email: 'info@africanhaircare.co.uk',
   emailFeedback: 'feedback@africanhaircare.co.uk',
   address: 'Unit 4, Silbury Arcade, Central Milton Keynes, MK9 3AG',
   mapsQuery: 'Silbury Arcade, Central Milton Keynes, MK9 3AG',
@@ -95,7 +95,7 @@ const OPENING_HOURS = [
   { day: 'Thursday',  hours: '9:00 – 20:00' },
   { day: 'Friday',    hours: '9:00 – 20:00' },
   { day: 'Saturday',  hours: '8:00 – 19:00' },
-  { day: 'Sunday',    hours: '11:00 – 17:00' }
+  { day: 'Sunday',    hours: '11:00 – 13:00' }
 ];
 
 /* Team. `lead: true` gets the wide card at the top of the team page. */
