@@ -1,6 +1,6 @@
-name,slug,blurb,sort_order,active
-Braids,braids,"Knotless, box, cornrows and Fulani styles.",1,TRUE
-Twists & Locs,twists-locs,"Twists, starter locs, retwists and faux locs.",2,TRUE
-Weaves & Wigs,weaves-wigs,"Sew-ins, wig installs, revamps and crochet.",3,TRUE
-Natural Hair,natural-hair,"Silk press, treatments, trims and scalp care.",4,TRUE
-Beauty,beauty,"Lashes, brows, threading, waxing and makeup.",5,TRUE
+name,slug,blurb,image_url,sort_order,active
+Braids,braids,"Knotless, box, cornrows and Fulani styles.",,1,TRUE
+Twists & Locs,twists-locs,"Twists, starter locs, retwists and faux locs.",,2,TRUE
+Weaves & Wigs,weaves-wigs,"Sew-ins, wig installs, revamps and crochet.",,3,TRUE
+Natural Hair,natural-hair,"Silk press, treatments, trims and scalp care.",,4,TRUE
+Beauty,beauty,"Lashes, brows, threading, waxing and makeup.",,5,TRUE

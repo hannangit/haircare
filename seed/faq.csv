@@ -1,0 +1,9 @@
+question,answer,sort_order,active
+How long does an appointment take?,"It depends on the style. Braids often run four to six hours, treatments under two. Every service on our prices page lists its own timing.",1,TRUE
+Do I need to bring my own hair?,"For some styles, yes. Each service says whether hair is included or whether you bring your own. If you are unsure, message us and we will tell you exactly how many packs.",2,TRUE
+"How do I pay, and is there a deposit?","A deposit holds your slot and comes off the final price. The balance is paid on the day by card, cash or bank transfer.",3,TRUE
+Can I cancel or move my appointment?,"Yes. With 48 hours' notice your deposit carries over to the new date. Under that, it covers the chair we held empty.",4,TRUE
+Can I ask for a particular stylist?,Please do. Mention their name when you book and we will call you back to confirm they are free.,5,TRUE
+Do you do children's hair?,"Yes. Any service marked ""Kids welcome"" is suitable for children.",6,TRUE
+Where are you and is there parking?,"We are in Silbury Arcade in Central Milton Keynes, a few minutes from MK Central. The Silbury Boulevard multi-storey is a two-minute walk.",7,TRUE
+Do you do patch tests?,"Yes, and some services need one at least 48 hours beforehand — relaxers, tints and anything bonded. They take two minutes and are free.",8,TRUE

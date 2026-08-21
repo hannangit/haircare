@@ -20,13 +20,18 @@
    matching is by header name, lower-cased and trimmed.                     */
 var PUBLISHED = {
   services:   ['id', 'name', 'category', 'price', 'duration_mins', 'hair',
-               'patch_test', 'kids', 'description', 'feats', 'sort_order'],
-  categories: ['name', 'slug', 'blurb', 'sort_order'],
+               'patch_test', 'kids', 'description', 'feats', 'image_url',
+               'sort_order'],
+  categories: ['name', 'slug', 'blurb', 'image_url', 'sort_order'],
   contact:    ['key', 'value'],
   hours:      ['day', 'hours', 'sort_order'],
   promos:     ['message', 'link_url', 'start_date', 'end_date', 'sort_order'],
-  team:       ['name', 'role', 'specialism', 'quote', 'phone', 'email',
+  /* Deliberately no phone or email. The site no longer shows staff contact
+     details, so publishing them would only leak them into the page source
+     for scrapers. The columns still exist in the sheet for the owner. */
+  team:       ['name', 'role', 'specialism', 'quote', 'image_url',
                'is_lead', 'sort_order'],
+  faq:        ['question', 'answer', 'sort_order'],
   settings:   ['key', 'value']
 };
 
@@ -291,48 +296,57 @@ function testPreview() {
    SETUP — run this ONCE, on a brand-new empty spreadsheet.
 
    In the Apps Script toolbar choose `setupSheet` and press Run. It builds
-   all seven tabs: header row, a note on every header explaining what that
-   column does, TRUE/FALSE dropdowns, a frozen header, sensible column
-   widths, and one clearly-fake example row showing the expected format.
+   an INSTRUCTIONS tab plus all eight content tabs: header row, a hover note
+   on every column explaining it, TRUE/FALSE dropdowns, a frozen header, and
+   one example row showing the expected format.
 
    Safe to re-run. A tab that already exists is left completely alone, so
    this can never overwrite the owner's data.
    ════════════════════════════════════════════════════════════════════════ */
 
+var IMAGE_NOTE =
+  'Optional photo. Paste a direct https:// link to the IMAGE FILE ITSELF ' +
+  '(it should end .jpg, .png or .webp). A Google Drive share link will NOT ' +
+  'work — Drive serves a viewer page, not a picture. Blank shows the ' +
+  'built-in artwork instead.';
+
 var SCHEMA = {
   services: {
     headers: ['id', 'name', 'category', 'price', 'duration_mins', 'hair',
-              'patch_test', 'kids', 'description', 'feats', 'sort_order', 'active'],
+              'patch_test', 'kids', 'description', 'feats', 'image_url',
+              'sort_order', 'active'],
     notes: {
       id: 'Unique. lowercase-with-hyphens, e.g. box-braids. Never reuse an id.',
       name: 'Shown on the card. Required.',
       category: 'Must match a name in the categories tab EXACTLY, or this service appears under no filter.',
-      price: 'Number only, e.g. 75. Blank shows "On request". 0 shows "Free".',
+      price: 'Number only, e.g. 75. Do not type a £ sign. Blank shows "On request". 0 shows "Free".',
       duration_mins: 'Whole minutes, e.g. 90. Displayed as "1 hr 30 mins".',
       hair: 'included = we supply the hair / client = they bring their own / blank = not applicable.',
       patch_test: 'TRUE adds a "Patch test needed" line to the card.',
       kids: 'TRUE adds "Kids welcome".',
-      description: 'One short paragraph. Shown in full on the card.',
+      description: 'One short paragraph, 1-3 sentences. Shown in full on the card. No booking details here - people enquire for those.',
       feats: 'Short bullet chips. ONE PER LINE inside the cell (Alt+Enter). Not comma-separated.',
+      image_url: IMAGE_NOTE,
       sort_order: 'Display order, lowest number first.',
-      active: 'FALSE removes this service from the website.'
+      active: 'FALSE removes this service from the website without deleting the row.'
     },
     example: ['box-braids', 'Box Braids', 'Braids', 75, 270, 'client', 'FALSE', 'FALSE',
               'The classic. Clean square partings and a long-lasting finish.',
-              'Small, medium or large\nShoulder to waist length', 1, 'TRUE'],
+              'Small, medium or large\nShoulder to waist length', '', 1, 'TRUE'],
     bools: ['patch_test', 'kids', 'active']
   },
 
   categories: {
-    headers: ['name', 'slug', 'blurb', 'sort_order', 'active'],
+    headers: ['name', 'slug', 'blurb', 'image_url', 'sort_order', 'active'],
     notes: {
       name: 'Exactly as typed in the services tab. Appears in the filter dropdown.',
       slug: 'lowercase-with-hyphens. Used for the colour accent.',
       blurb: 'One line, shown on the homepage category tile.',
+      image_url: IMAGE_NOTE,
       sort_order: 'Display order, lowest first.',
       active: 'FALSE hides the category.'
     },
-    example: ['Braids', 'braids', 'Knotless, box, cornrows and Fulani styles.', 1, 'TRUE'],
+    example: ['Braids', 'braids', 'Knotless, box, cornrows and Fulani styles.', '', 1, 'TRUE'],
     bools: ['active']
   },
 
@@ -382,10 +396,10 @@ var SCHEMA = {
   promos: {
     headers: ['message', 'link_url', 'start_date', 'end_date', 'sort_order', 'active'],
     notes: {
-      message: 'One line for the scrolling offers bar at the top of every page.',
+      message: 'One line for the scrolling offers bar at the top of every page. Offers only.',
       link_url: 'Optional. Must start with https:// or it is ignored.',
       start_date: 'Optional, YYYY-MM-DD. Hidden before this date.',
-      end_date: 'Optional, YYYY-MM-DD. Hidden after this date. This is how you schedule an offer.',
+      end_date: 'Optional, YYYY-MM-DD. Hidden after this date. This is how you schedule an offer in advance.',
       sort_order: 'Display order.',
       active: 'FALSE hides it whatever the dates say.'
     },
@@ -394,23 +408,49 @@ var SCHEMA = {
   },
 
   team: {
-    headers: ['name', 'role', 'specialism', 'quote', 'phone', 'email',
-              'is_lead', 'sort_order', 'active'],
+    headers: ['name', 'role', 'specialism', 'quote', 'image_url',
+              'is_lead', 'sort_order', 'active', 'phone_private', 'email_private'],
     notes: {
-      name: 'Full name. The initials become the avatar.',
+      name: 'Full name. Without a photo, the initials become the avatar.',
       role: 'e.g. Senior Stylist.',
       specialism: 'Short list, e.g. Braids / Locs / Silk press.',
       quote: 'Optional. Only shown on the lead card.',
-      phone: 'Optional.',
-      email: 'Optional.',
+      image_url: IMAGE_NOTE,
       is_lead: 'TRUE gives the wide card at the top. Normally just the owner.',
       sort_order: 'Display order.',
-      active: 'FALSE hides them.'
+      active: 'FALSE hides them.',
+      phone_private: 'YOUR REFERENCE ONLY. Never published to the website - clients ask for a stylist when they book.',
+      email_private: 'YOUR REFERENCE ONLY. Never published to the website.'
     },
     example: ['Jane Doe', 'Owner & Senior Stylist', 'Braids / Locs',
-              'Why I opened the salon.', '+44 7700 900123', 'jane@example.co.uk',
-              'TRUE', 1, 'TRUE'],
+              'Why I opened the salon.', '', 'TRUE', 1, 'TRUE',
+              '+44 7700 900123', 'jane@example.co.uk'],
     bools: ['is_lead', 'active']
+  },
+
+  faq: {
+    headers: ['question', 'answer', 'sort_order', 'active'],
+    notes: {
+      question: 'Short, in the client\'s own words - "How long do braids take?". These become the tappable buttons in the chat window at the bottom of every page.',
+      answer: 'Two or three sentences, plain text. No links or HTML. If the honest answer is "it depends", say so and invite them to message.',
+      sort_order: 'Display order. Put the four or five most-asked first - only the first 8 are shown.',
+      active: 'FALSE hides this question.'
+    },
+    rows: [
+      ['How long does an appointment take?',
+       'It depends on the style. Braids often run four to six hours, treatments under two. Every service on our prices page lists its own timing.', 1, 'TRUE'],
+      ['Do I need to bring my own hair?',
+       'For some styles, yes. Each service says whether hair is included or whether you bring your own. If you are unsure, message us and we will tell you exactly how many packs.', 2, 'TRUE'],
+      ['How do I pay, and is there a deposit?',
+       'A deposit holds your slot and comes off the final price. The balance is paid on the day by card, cash or transfer.', 3, 'TRUE'],
+      ['Can I cancel or move my appointment?',
+       'Yes. With enough notice your deposit carries over to the new date. Under that, it covers the chair we held empty.', 4, 'TRUE'],
+      ['Can I ask for a particular stylist?',
+       'Please do. Mention their name when you book and we will call you back to confirm they are free.', 5, 'TRUE'],
+      ['Do you do children\'s hair?',
+       'Yes. Services marked "Kids welcome" are suitable for children.', 6, 'TRUE']
+    ],
+    bools: ['active']
   },
 
   settings: {
@@ -427,15 +467,58 @@ var SCHEMA = {
       ['consult_title', 'Free Consultation', 'TRUE'],
       ['consult_body', 'A free 15-minute assessment before any appointment.', 'TRUE'],
       ['consult_cta', 'Book my consultation', 'TRUE'],
-      ['intro_text', '', 'TRUE']
+      ['intro_text', '', 'TRUE'],
+      ['chat_greeting', 'Hi! Tap a question below, or message us on WhatsApp and a real person will answer.', 'TRUE'],
+      ['stylist_note', 'Prefer a particular stylist? Mention their name when you book. We will call you to confirm they are free, so please leave a time that suits you for a call back.', 'TRUE']
     ],
     bools: ['active']
   }
 };
 
+/* The instructions the owner actually reads. Written into the sheet itself,
+   because a README in a repo is invisible to the person editing prices. */
+var INSTRUCTIONS = [
+  ['HOW TO EDIT YOUR WEBSITE', ''],
+  ['', ''],
+  ['Everything on this sheet is your website\'s content. Edit a cell, and the site follows.', ''],
+  ['Changes appear within about 15 minutes. Nothing else needs to be done - no developer, no re-publishing.', ''],
+  ['', ''],
+  ['THE GOLDEN RULES', ''],
+  ['1.', 'Never rename, reorder or delete a heading in row 1. The website finds your data by those names.'],
+  ['2.', 'Never rename anything in a "key" column. Change the "value" next to it instead.'],
+  ['3.', 'To hide something, set active to FALSE. Do not delete the row - you will want it back.'],
+  ['4.', 'Blank often means something. Blank hours = Closed. Blank price = "On request". A price of 0 = "Free".'],
+  ['5.', 'Lists go one item per line inside a single cell. Press Alt+Enter for a new line. Never separate with commas.'],
+  ['6.', 'Prices are numbers only. Type 75, not £75 - the site adds the £ sign.'],
+  ['7.', 'Hover over any heading in row 1 to see exactly what that column does.'],
+  ['', ''],
+  ['WHAT EACH TAB DOES', ''],
+  ['services', 'Every service, its price, how long it takes and its description. The main one you will edit.'],
+  ['categories', 'The groups services are filtered by. A category name here must match the category typed on the service, letter for letter.'],
+  ['contact', 'Phone, email, address. Changing the phone here changes it everywhere, including the WhatsApp buttons.'],
+  ['hours', 'Opening times. Leave the hours cell blank for a day you are closed.'],
+  ['promos', 'The scrolling offers bar at the top of every page. Offers only. Set an end date and it removes itself.'],
+  ['team', 'Your stylists. The last two columns are for your reference and are never published.'],
+  ['faq', 'The questions in the chat window at the bottom right of every page. Anything asked more than twice belongs here.'],
+  ['settings', 'Deposit, cancellation window, and the wording of the consultation box and chat greeting.'],
+  ['', ''],
+  ['ADDING PHOTOS', ''],
+  ['', 'The image_url column takes a link to the picture file itself - it should end .jpg, .png or .webp.'],
+  ['', 'A normal Google Drive share link will NOT work: Drive serves a viewer page, not a picture.'],
+  ['', 'The reliable route is your own website\'s images folder, or a host that gives you a direct image link.'],
+  ['', 'Leave it blank and the built-in artwork is used, which is a perfectly good answer.'],
+  ['', ''],
+  ['IF SOMETHING LOOKS WRONG', ''],
+  ['', 'A service vanished: check active is TRUE, and that its category matches the categories tab exactly.'],
+  ['', 'Nothing is updating: give it 15 minutes. Your changes are cached so the site stays fast.'],
+  ['', 'Everything reverted to the old content: the sheet could not be read. Tell your developer - the site keeps working on its built-in copy in the meantime.']
+];
+
 function setupSheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var made = [], skipped = [];
+
+  writeInstructions(ss, made, skipped);
 
   Object.keys(SCHEMA).forEach(function (name) {
     if (ss.getSheetByName(name)) { skipped.push(name); return; }
@@ -449,6 +532,8 @@ function setupSheet() {
 
     def.headers.forEach(function (h, i) {
       if (def.notes && def.notes[h]) sh.getRange(1, i + 1).setNote(def.notes[h]);
+      // A column the site never publishes should look different from one it does.
+      if (h.indexOf('_private') !== -1) sh.getRange(1, i + 1).setBackground('#4A4A4A');
     });
 
     var body = def.rows || (def.example ? [def.example] : []);
@@ -467,8 +552,10 @@ function setupSheet() {
     sh.setFrozenRows(1);
     sh.getRange(1, 1, sh.getMaxRows(), cols).setFontFamily('Arial');
     for (var c = 1; c <= cols; c++) sh.setColumnWidth(c, 170);
-    var di = def.headers.indexOf("description");
-    if (di !== -1) sh.setColumnWidth(di + 1, 340);   // prose needs the room
+    ['description', 'answer', 'quote', 'blurb'].forEach(function (wide) {
+      var i = def.headers.indexOf(wide);
+      if (i !== -1) sh.setColumnWidth(i + 1, 340);       // prose needs the room
+    });
 
     made.push(name);
   });
@@ -477,8 +564,35 @@ function setupSheet() {
   var blank = ss.getSheetByName('Sheet1');
   if (blank && ss.getSheets().length > 1 && blank.getLastRow() === 0) ss.deleteSheet(blank);
 
-  Logger.log('Created: %s', made.length ? made.join(', ') : '(none)');
-  Logger.log('Already existed, left alone: %s', skipped.length ? skipped.join(', ') : '(none)');
-  Logger.log('Next: run testPayload, then testDataQuality, then Deploy as a web app');
-  Logger.log('with "Who has access: Anyone".');
+  var msg = 'Created: ' + (made.length ? made.join(', ') : '(none)') +
+            '\nAlready existed, left alone: ' + (skipped.length ? skipped.join(', ') : '(none)') +
+            '\n\nNext: run testPayload, then testDataQuality, then Deploy > New deployment' +
+            '\n> Web app, with "Who has access: Anyone".';
+  Logger.log(msg);
+  try { ss.toast('Sheet ready. Read the INSTRUCTIONS tab first.', 'Setup complete', 8); } catch (e) {}
+  return msg;
+}
+
+function writeInstructions(ss, made, skipped) {
+  var NAME = 'INSTRUCTIONS';
+  if (ss.getSheetByName(NAME)) { skipped.push(NAME); return; }
+
+  var sh = ss.insertSheet(NAME, 0);          // first, so it is what opens
+  sh.getRange(1, 1, INSTRUCTIONS.length, 2).setValues(INSTRUCTIONS);
+  sh.getRange(1, 1, sh.getMaxRows(), 2).setFontFamily('Arial').setVerticalAlignment('top');
+  sh.setColumnWidth(1, 210);
+  sh.setColumnWidth(2, 760);
+  sh.getRange(1, 1, sh.getMaxRows(), 2).setWrap(true);
+
+  // Headings are the rows with text in column A and nothing in column B.
+  INSTRUCTIONS.forEach(function (row, i) {
+    var isHeading = row[0] && !row[1] && row[0] === row[0].toUpperCase();
+    if (isHeading) {
+      sh.getRange(i + 1, 1, 1, 2).setFontWeight('bold')
+        .setBackground('#241429').setFontColor('#F3EBE3');
+    }
+  });
+  sh.getRange(1, 1).setFontSize(14);
+  sh.setFrozenRows(1);
+  made.push(NAME);
 }

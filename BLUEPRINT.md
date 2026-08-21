@@ -53,9 +53,10 @@ does not change.
 2. **Extensions → Apps Script**, delete the placeholder, paste **all** of
    `apps-script/Code.gs`, save.
 3. In the toolbar pick **`setupSheet`** and press **Run**. Approve the
-   permission prompt once. It creates all seven tabs — headers, hover notes
-   explaining every column, TRUE/FALSE dropdowns, frozen header row — plus one
-   example row per tab showing the expected format.
+   permission prompt once. It creates an **INSTRUCTIONS** tab plus all eight
+   content tabs — headers, a hover note on every column explaining it,
+   TRUE/FALSE dropdowns, frozen header row — and one example row per tab
+   showing the expected format.
 4. Replace the example rows with the real business content.
 
 `setupSheet` is safe to re-run: a tab that already exists is skipped, never
@@ -66,28 +67,40 @@ overwritten.
 > (*File → Import → Upload → Replace current sheet*). That reproduces this
 > site's 25 services exactly.
 
-### The seven tabs
+### The eight tabs
 
 | Tab | One row per | Key columns |
 |---|---|---|
-| `services` | service | `name`, `category`, `price`, `duration_mins`, `description`, `feats`, `active` |
-| `categories` | filter group | `name` (must match `services.category` exactly), `slug`, `blurb` |
+| `services` | service | `name`, `category`, `price`, `duration_mins`, `description`, `feats`, `image_url`, `active` |
+| `categories` | filter group | `name` (must match `services.category` exactly), `slug`, `blurb`, `image_url` |
 | `contact` | detail | `key`, `value` — `phone`, `email_general`, `address`, `maps_query`, … |
 | `hours` | day | `day`, `hours` (**blank = Closed**), `sort_order` |
 | `promos` | ticker message | `message`, `start_date`, `end_date` — dates schedule offers |
-| `team` | staff member | `name`, `role`, `specialism`, `is_lead` |
-| `settings` | site value | `key`, `value` — `deposit`, `cancellation_hours`, consultation copy |
+| `team` | staff member | `name`, `role`, `specialism`, `image_url`, `is_lead` |
+| `faq` | chat question | `question`, `answer` — drives the chat widget, first 8 shown |
+| `settings` | site value | `key`, `value` — `deposit`, `cancellation_hours`, consultation and chat copy |
 
 Rules that apply everywhere:
 
 - **`active = FALSE` hides the row** without deleting it. The Apps Script drops
   those rows before the JSON leaves Google, so drafts never reach the page source.
 - **Blank is meaningful.** Blank `hours` = Closed. Blank `price` = "On request".
-  `0` = "Free". Blank `instagram_url` = hide the icon.
+  `0` = "Free". Blank `instagram_url` = hide the icon. Blank `image_url` = use
+  the built-in generated artwork.
 - **Lists go one line per item inside the cell** (Alt+Enter), never comma-separated.
 - **Never rename a header or a `key`.** The site looks them up by name.
+- **Prices are numbers.** `75`, not `£75`.
 - Extra columns are ignored, so private working columns (cost, supplier, notes)
-  can live in the same tab and will never be published.
+  can live in the same tab and will never be published. `team` ships with
+  `phone_private` and `email_private` for exactly this reason — the site does
+  not show staff contact details, so the endpoint does not publish them.
+
+### `image_url` — the one that catches people out
+
+It must be a link to the **image file itself**, ending `.jpg`, `.png` or
+`.webp`. A normal Google Drive share link serves an HTML viewer page, not a
+picture, and will render as a broken image. Anything that is not plainly
+`http(s)` is dropped by the data layer before it can reach an `src`.
 
 ## Step 3 — Publish the sheet
 
@@ -162,13 +175,14 @@ assertions, all should pass. Then spot-check by hand:
 | Contact details, legal numbers | Sheet → `contact` | Owner |
 | Opening hours | Sheet → `hours` | Owner |
 | Offers / ticker (with date ranges) | Sheet → `promos` | Owner |
-| Staff | Sheet → `team` | Owner |
-| Deposit, cancellation window, widget copy | Sheet → `settings` | Owner |
+| Staff, and their photos | Sheet → `team` | Owner |
+| Chat questions and answers | Sheet → `faq` | Owner |
+| Deposit, cancellation window, consultation + chat copy | Sheet → `settings` | Owner |
 | Endpoint, booking + reviews providers, phone | `assets/js/config.js` | You, once |
 | Fallback copy of all sheet content | `config.js` + `services-data.js` | You, once |
 | Page titles, meta descriptions, headings | The HTML | You, once (SEO — keep static) |
 | Long-form policy pages | `care/*.html` | You, once |
-| Design, layout, behaviour | `style.css`, `main.js`, `data.js`, `providers.js` | Shared — avoid per-site edits |
+| Design, layout, behaviour | `style.css`, `main.js`, `data.js`, `providers.js`, `chat.js` | Shared — avoid per-site edits |
 
 ## Architecture, in one paragraph
 
@@ -196,8 +210,13 @@ loading spinner anywhere.
 6. **Do not put fixed positioned elements inside `<header>`** — it has
    `backdrop-filter`, which makes it the containing block, and they size to the
    header instead of the viewport.
-7. **`z-index`**: header 100 · social 180 · WhatsApp 200 · consult 210 · scrim
+7. **`z-index`**: header 100 · social 180 · chat 205 · consult 210 · scrim
    215 · drawer 220 · modal 300. Do not use 9999.
+8. **`image_url` must point at the image file**, not a Drive share page.
+   Anything not plainly `http(s)` is dropped before it reaches an `src`.
+9. **Enquire and Book are separate routes** and must stay that way: Enquire
+   offers WhatsApp and a phone call, Book offers the scheduler. Section G of
+   the provider suite fails if they start offering each other again.
 
 ## Per-site checklist
 
@@ -206,9 +225,10 @@ loading spinner anywhere.
 [ ] Sheet created, Code.gs pasted, setupSheet run, content filled in
 [ ] testPayload + testDataQuality run clean
 [ ] Deployed as web app, access = Anyone, /exec returns {"ok":true
-[ ] config.js filled in (13 settings)
+[ ] config.js filled in (9 sections)
 [ ] bash build.sh
-[ ] Both test suites pass
+[ ] Both test suites pass (110 assertions)
+[ ] Chat widget opens, a question answers, WhatsApp handover works
 [ ] Deployed to Pages / Cloudflare
 [ ] Placeholder content replaced (see README checklist)
 [ ] Privacy policy + cookie notice added if forms/embeds collect data

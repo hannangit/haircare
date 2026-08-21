@@ -1,7 +1,7 @@
-name,role,specialism,quote,phone,email,is_lead,sort_order,active
-Ijeoma Balogun,Owner & Senior Braider,Knotless braids · Fulani · Boho,"I opened this salon because I got tired of watching people leave with headaches and thinner edges than they came in with. Tension is a skill, not an accident.",+44 7700 900123,ijeoma@africanhaircare.co.uk,TRUE,1,TRUE
-Nkechi Mensah,Loc Technician,Starter locs · Retwists · Repairs,,+44 7700 900124,nkechi@africanhaircare.co.uk,FALSE,2,TRUE
-Shanice Baptiste,Natural Hair Specialist,Silk press · Trims · Scalp care,,+44 7700 900125,shanice@africanhaircare.co.uk,FALSE,3,TRUE
-Fatou Diallo,Weave & Wig Specialist,Sew-ins · Frontals · Wig revamps,,+44 7700 900126,fatou@africanhaircare.co.uk,FALSE,4,TRUE
-Priya Anand,Beauty Therapist,Lashes · Brows · Threading · Makeup,,+44 7700 900127,priya@africanhaircare.co.uk,FALSE,5,TRUE
-Tolu Adeyemi,Braider & Apprentice Lead,"Box braids · Twists · Children's styles",,+44 7700 900128,tolu@africanhaircare.co.uk,FALSE,6,TRUE
+name,role,specialism,quote,image_url,is_lead,sort_order,active,phone_private,email_private
+Ijeoma Balogun,Owner & Senior Braider,Knotless braids · Fulani · Boho,"I opened this salon because I got tired of watching people leave with headaches and thinner edges than they came in with. Tension is a skill, not an accident.",,TRUE,1,TRUE,+44 7700 900123,ijeoma@africanhaircare.co.uk
+Nkechi Mensah,Loc Technician,Starter locs · Retwists · Repairs,,,FALSE,2,TRUE,+44 7700 900124,nkechi@africanhaircare.co.uk
+Shanice Baptiste,Natural Hair Specialist,Silk press · Trims · Scalp care,,,FALSE,3,TRUE,+44 7700 900125,shanice@africanhaircare.co.uk
+Fatou Diallo,Weave & Wig Specialist,Sew-ins · Frontals · Wig revamps,,,FALSE,4,TRUE,+44 7700 900126,fatou@africanhaircare.co.uk
+Priya Anand,Beauty Therapist,Lashes · Brows · Threading · Makeup,,,FALSE,5,TRUE,+44 7700 900127,priya@africanhaircare.co.uk
+Tolu Adeyemi,Braider & Apprentice Lead,"Box braids · Twists · Children's styles",,,FALSE,6,TRUE,+44 7700 900128,tolu@africanhaircare.co.uk
