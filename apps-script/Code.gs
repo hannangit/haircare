@@ -521,11 +521,15 @@ function setupSheet() {
   writeInstructions(ss, made, skipped);
 
   Object.keys(SCHEMA).forEach(function (name) {
-    if (ss.getSheetByName(name)) { skipped.push(name); return; }
-
     var def = SCHEMA[name];
     var cols = def.headers.length;
-    var sh = ss.insertSheet(name);
+    var sh = ss.getSheetByName(name);
+
+    // A tab that exists but is completely empty is one someone created by hand
+    // and never filled in. Filling it is what they wanted; skipping it leaves a
+    // headerless tab that publishes nothing and gives no clue why.
+    if (sh && sh.getLastRow() > 0) { skipped.push(name); return; }
+    if (!sh) sh = ss.insertSheet(name);
 
     sh.getRange(1, 1, 1, cols).setValues([def.headers])
       .setFontWeight('bold').setBackground('#241429').setFontColor('#F3EBE3');
@@ -575,9 +579,10 @@ function setupSheet() {
 
 function writeInstructions(ss, made, skipped) {
   var NAME = 'INSTRUCTIONS';
-  if (ss.getSheetByName(NAME)) { skipped.push(NAME); return; }
+  var existing = ss.getSheetByName(NAME);
+  if (existing && existing.getLastRow() > 0) { skipped.push(NAME); return; }
 
-  var sh = ss.insertSheet(NAME, 0);          // first, so it is what opens
+  var sh = existing || ss.insertSheet(NAME, 0);          // first, so it is what opens
   sh.getRange(1, 1, INSTRUCTIONS.length, 2).setValues(INSTRUCTIONS);
   sh.getRange(1, 1, sh.getMaxRows(), 2).setFontFamily('Arial').setVerticalAlignment('top');
   sh.setColumnWidth(1, 210);
