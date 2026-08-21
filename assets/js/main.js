@@ -415,7 +415,13 @@ function openPanel(opts) {
 
   const wa = document.getElementById('m-whatsapp');
   const waHref = window.PROVIDERS ? PROVIDERS.waLink((opts && opts.waSubject) || serviceName) : '';
-  if (waHref) { wa.href = waHref; wa.hidden = false; } else { wa.hidden = true; }
+  const wantWa = !!waHref && !(opts && opts.hideWhatsapp === true);
+  if (wantWa) { wa.href = waHref; wa.hidden = false; } else { wa.hidden = true; }
+
+  const call = document.getElementById('m-call');
+  const telHref = window.PROVIDERS ? PROVIDERS.telLink() : '';
+  const wantCall = !!(opts && opts.showCall) && !!telHref;
+  if (wantCall) { call.href = telHref; call.hidden = false; } else { call.hidden = true; }
 
   const book = document.getElementById('m-book');
   const hasScheduler = window.PROVIDERS && PROVIDERS.bookingProvider() !== 'none';
@@ -427,11 +433,32 @@ function openPanel(opts) {
   initIcons();
 }
 
-/* Both entry points land on the same panel: "Book" leads with the scheduler,
-   "Enquire" leads with the same options because the answer to "can I ask a
-   question" is also "message us". */
-function openBooking(id) { openPanel({ service: serviceById(id) }); }
-function openEnquiryForm(service) { openPanel({ service: service }); }
+/* The two buttons do two different jobs, and mixing them was the complaint.
+   Enquire = talk to a person, now. Book = take a slot in the calendar.
+   Neither offers the other's route. */
+function openBooking(id) {
+  const service = serviceById(id);
+  const hasScheduler = window.PROVIDERS && PROVIDERS.bookingProvider() !== 'none';
+  openPanel({
+    service: service,
+    title: service ? 'Book ' + service.title : 'Book an appointment',
+    // With no scheduler configured there is nothing to show, so the panel
+    // falls back to WhatsApp rather than presenting a dead end.
+    hideWhatsapp: hasScheduler,
+    note: hasScheduler ? '' : 'Send us a message and we will find you a slot.'
+  });
+}
+
+function openEnquiryForm(service) {
+  openPanel({
+    service: service,
+    title: service ? 'Ask about ' + service.title : 'Ask us a question',
+    notice: '',                     // the booking terms are not the answer here
+    hideScheduler: true,
+    showCall: true,
+    note: 'Ask us anything — prices, timings, what to bring. No booking needed.'
+  });
+}
 
 function openStylist() {
   openPanel({
@@ -514,37 +541,39 @@ function renderTeam() {
   const escA = window.AHC ? AHC.escAttr : (v => v);
   const initials = n => n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
-  const links = m => {
-    const out = [];
-    if (m.phone) out.push(`<a href="${escA(window.AHC ? AHC.telHref(m.phone) : 'tel:' + m.phone)}" aria-label="Call ${escA(m.name)}">Call</a>`);
-    if (m.email) out.push(`<a href="mailto:${escA(m.email)}" aria-label="Email ${escA(m.name)}">Email</a>`);
-    return out.length ? `<div class="team-links">${out.join('')}</div>` : '';
-  };
+  // No per-stylist phone or email. Ringing a stylist mid-appointment reaches
+  // nobody, and a published direct line only gets scraped — so the ask is
+  // "name them when you book" and we call back to confirm availability.
+  const avatar = m => m.photo
+    ? `<img class="team-photo" src="${escA(m.photo)}" alt="${escA(m.name)}" loading="lazy">`
+    : `<div class="team-avatar" aria-hidden="true">${esc(initials(m.name))}</div>`;
 
   const lead = TEAM.filter(m => m.lead);
   const rest = TEAM.filter(m => !m.lead);
 
   if (leadEl) {
     leadEl.innerHTML = lead.map(m => `<div class="team-card team-card--lead">
-      <div class="team-avatar" aria-hidden="true">${esc(initials(m.name))}</div>
+      ${avatar(m)}
       <div class="team-lead-body">
         <h4>${esc(m.name)}</h4>
         <div class="team-role">${esc(m.role)}</div>
         ${m.area ? `<div class="team-area">${esc(m.area)}</div>` : ''}
         ${m.quote ? `<p class="team-quote">&ldquo;${esc(m.quote)}&rdquo;</p>` : ''}
-        ${links(m)}
       </div>
     </div>`).join('');
   }
   if (gridEl) {
     gridEl.innerHTML = rest.map(m => `<div class="team-card">
-      <div class="team-avatar" aria-hidden="true">${esc(initials(m.name))}</div>
+      ${avatar(m)}
       <h4>${esc(m.name)}</h4>
       <div class="team-role">${esc(m.role)}</div>
       ${m.area ? `<div class="team-area">${esc(m.area)}</div>` : ''}
-      ${links(m)}
     </div>`).join('');
   }
+
+  // One note for the whole page, not a button on every card.
+  const noteEl = document.getElementById('stylist-note');
+  if (noteEl && CONFIG.stylistNote) noteEl.textContent = CONFIG.stylistNote;
 }
 
 /* ---------- Editable copy ----------
@@ -580,6 +609,7 @@ function renderAll() {
   renderCategories();
   renderSearch();
   renderTeam();
+  if (window.AHC_CHAT) AHC_CHAT.refresh();   // the sheet may have new questions
   initIcons();          // re-scan: freshly rendered markup contains data-icon
 }
 window.AHC_RENDER = renderAll;

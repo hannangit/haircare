@@ -182,6 +182,12 @@
   <button class="social-icon social-icon--cta" type="button" data-book="" aria-label="Book an appointment"><span data-icon="calendar" data-icon-size="19"></span></button>
 </div>
 
+<!-- Chat widget. Everything inside is built by assets/js/chat.js, so this
+     stays one empty div on all 35 pages and the widget changes in one file.
+     Must be a direct child of <body>: it holds position:fixed children, and a
+     `backdrop-filter` ancestor would make itself their containing block. -->
+<div id="chat-root"></div>
+
 <button class="to-top" type="button" data-action="to-top" aria-label="Back to top">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
@@ -217,15 +223,19 @@
       <button type="button" class="x" id="m-close" aria-label="Close">&#10005;</button>
     </div>
     <div class="modal-bd">
-      <!-- No form, no form backend. Two ways through: message us, or pick a
-           slot. Both are configured in config.js, so a new site changes the
-           number and the booking link and nothing else. -->
+      <!-- No form, no form backend. Which buttons show depends on how the
+           panel was opened: Enquire offers WhatsApp and a phone call, Book
+           offers the scheduler. Both are configured in config.js, so a new
+           site changes the number and the booking link and nothing else. -->
       <p class="booking-notice" id="m-notice"></p>
       <div class="action-grid">
         <a class="btn btn-gold u-full" id="m-whatsapp" href="#" target="_blank" rel="noopener">
           <span data-icon="whatsapp" data-icon-size="18"></span> Message us on WhatsApp
         </a>
-        <button class="btn btn-outline u-full" type="button" id="m-book">
+        <a class="btn btn-outline u-full" id="m-call" href="#" hidden>
+          <span data-icon="phone" data-icon-size="18"></span> Call the salon
+        </a>
+        <button class="btn btn-gold u-full" type="button" id="m-book">
           <span data-icon="calendar" data-icon-size="18"></span> See available slots
         </button>
       </div>
@@ -241,5 +251,6 @@
 <script src="assets/js/services-data.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/main.js"></script>
+<script src="assets/js/chat.js"></script>
 </body>
 </html>

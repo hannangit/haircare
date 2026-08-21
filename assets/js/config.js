@@ -68,7 +68,17 @@ const CONFIG = {
     'Please arrive at your booked start time. The appointment can run longer ' +
     'than the slot shown, depending on the service. You will receive a ' +
     'confirmation email, but your booking is only confirmed once payment is ' +
-    'made — the online calendar just shows you our available slots.'
+    'made — the online calendar just shows you our available slots.',
+
+  /* ── 9. CHAT + STYLISTS ───────────────────────────────────────────────────
+     Both are overridden by the `settings` tab (chat_greeting, stylist_note). */
+  chatGreeting:
+    'Hi! Tap a question below, or message us on WhatsApp and a real person ' +
+    'will answer.',
+  stylistNote:
+    'Prefer a particular stylist? Mention their name when you book. We will ' +
+    'call you to confirm they are free, so please leave a time that suits ' +
+    'you for a call back.'
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -85,6 +95,25 @@ const TICKER_MESSAGES = [
   'Free 15-minute consultation with every booking',
   'Knotless braids are booking ~2 weeks ahead — reserve early',
   'Walk-ins welcome for brows, threading and quick treatments'
+];
+
+/* The chat window at the bottom right. Tapping a question shows its answer;
+   anything not covered here hands over to WhatsApp. The live version comes
+   from the `faq` tab, so the owner adds a question the moment it gets asked
+   twice — which is the whole point of the widget. */
+const FAQ = [
+  { q: 'How long does an appointment take?',
+    a: 'It depends on the style. Braids often run four to six hours, treatments under two. Every service on our prices page lists its own timing.', sort: 1 },
+  { q: 'Do I need to bring my own hair?',
+    a: 'For some styles, yes. Each service says whether hair is included or whether you bring your own. If you are unsure, message us and we will tell you exactly how many packs.', sort: 2 },
+  { q: 'How do I pay, and is there a deposit?',
+    a: 'A deposit holds your slot and comes off the final price. The balance is paid on the day by card, cash or bank transfer.', sort: 3 },
+  { q: 'Can I cancel or move my appointment?',
+    a: 'Yes. With 48 hours’ notice your deposit carries over to the new date. Under that, it covers the chair we held empty.', sort: 4 },
+  { q: 'Can I ask for a particular stylist?',
+    a: 'Please do. Mention their name when you book and we will call you back to confirm they are free.', sort: 5 },
+  { q: 'Do you do children’s hair?',
+    a: 'Yes. Any service marked “Kids welcome” is suitable for children.', sort: 6 }
 ];
 
 /* Opening hours, in one place so the footer and Find Us page agree. */

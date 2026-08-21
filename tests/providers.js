@@ -4,6 +4,9 @@ const flush = () => { document.getElementById('out').textContent = out.join('\n'
 const log = (...a) => { out.push(a.join(' ')); flush(); };
 let fails = 0;
 const C = w => (w && w.AHC ? w.AHC.snapshot().CONFIG : {});
+// Top-level `const` is lexical, not a window property, so the globals are only
+// reachable through the accessor the data layer exposes.
+const S = w => (w && w.AHC ? w.AHC.snapshot() : {});
 const chk = (n, ok, d) => { if (!ok) fails++; log((ok ? '  PASS  ' : '  FAIL  ') + n + (d ? '   ' + d : '')); };
 
 function frame(src) {
@@ -36,7 +39,14 @@ async function ready(f) {
     chk('panel opens', !d.getElementById('modal').hidden);
     chk('whatsapp button visible', wa && !wa.hidden);
     const href = wa.getAttribute('href');
-    chk('wa.me link with the configured number', /^https:\/\/wa\.me\/447700900123\?text=/.test(href), href.slice(0, 60));
+    // Derived from CONFIG, not hardcoded: the phone number is a per-site value
+    // and this suite has to keep passing after someone changes it.
+    const expected = String(C(w).whatsappNumber || C(w).phone)
+      .replace(/[^\d+]/g, '').replace(/^(\+\d{1,3})0(\d)/, '$1$2').replace(/^\+/, '')
+      .replace(/^0(\d)/, '44$1');
+    chk('wa.me link with the configured number',
+        href.indexOf('https://wa.me/' + expected + '?text=') === 0,
+        href.slice(0, 60) + '  (expected ' + expected + ')');
     const msg = decodeURIComponent((href.split('text=')[1] || ''));
     chk('message prefilled with business name', msg.includes('African Hair Care'), msg);
     chk('message prefilled with the service', /Knotless Box Braids/.test(msg), msg);
@@ -122,6 +132,82 @@ async function ready(f) {
     d.querySelector('.burger').click();
     await new Promise(r => setTimeout(r, 350));
     chk('drawer opens', d.getElementById('mmenu').classList.contains('open'));
+  }
+
+  log('');
+  log('=== G. Enquire and Book do not offer each other ===');
+  {
+    const { w, d } = await ready(await frame('../services.html'));
+
+    d.querySelector('.prop [data-enquire]').click();
+    await new Promise(r => setTimeout(r, 300));
+    chk('enquire: titled as a question', /^Ask about /.test(d.getElementById('m-title').textContent),
+        d.getElementById('m-title').textContent);
+    chk('enquire: no scheduler button', d.getElementById('m-book').hidden);
+    chk('enquire: whatsapp offered', !d.getElementById('m-whatsapp').hidden);
+    chk('enquire: call offered', !d.getElementById('m-call').hidden,
+        d.getElementById('m-call').getAttribute('href'));
+    chk('enquire: dials the configured number',
+        /^tel:\+?\d+$/.test(d.getElementById('m-call').getAttribute('href') || ''));
+    chk('enquire: booking terms not shown', d.getElementById('m-notice').hidden);
+
+    d.getElementById('m-close').click();
+    await new Promise(r => setTimeout(r, 250));
+
+    d.querySelector('.prop [data-book]').click();
+    await new Promise(r => setTimeout(r, 300));
+    chk('book: titled as a booking', /^Book /.test(d.getElementById('m-title').textContent),
+        d.getElementById('m-title').textContent);
+    chk('book: scheduler offered', !d.getElementById('m-book').hidden);
+    chk('book: no whatsapp shortcut', d.getElementById('m-whatsapp').hidden);
+    chk('book: no call shortcut', d.getElementById('m-call').hidden);
+    chk('book: booking terms shown', !d.getElementById('m-notice').hidden);
+  }
+
+  log('');
+  log('=== H. Chat widget ===');
+  {
+    const { w, d } = await ready(await frame('../index.html'));
+    await new Promise(r => setTimeout(r, 400));
+    const L = d.getElementById('chat-launcher');
+    const P = d.getElementById('chat-panel');
+    chk('launcher present', !!L);
+    chk('panel closed at rest', P.hidden);
+
+    L.click();
+    await new Promise(r => setTimeout(r, 250));
+    chk('panel opens', !P.hidden);
+    chk('greeting shown', d.querySelectorAll('.chat-row--in').length === 1);
+    const chips = d.querySelectorAll('.chat-chip');
+    chk('questions offered', chips.length > 0, 'chips = ' + chips.length);
+
+    chips[0].click();
+    await new Promise(r => setTimeout(r, 900));
+    chk('question echoed as the visitor', d.querySelectorAll('.chat-row--out').length === 1);
+    chk('answer returned',
+        d.querySelectorAll('.chat-row--in:not(.chat-row--typing) .chat-bubble').length === 2);
+    chk('answered question removed from the list',
+        d.querySelectorAll('.chat-chip').length === chips.length - 1);
+    chk('whatsapp handover present',
+        /^https:\/\/wa\.me\//.test(d.getElementById('chat-wa').getAttribute('href') || ''));
+
+    // A sheet cell must not be able to contribute markup here either.
+    S(w).FAQ.length = 0;
+    S(w).FAQ.push({ q: '<img src=x onerror=alert(1)>', a: '<script>bad()<\/script>', sort: 1 });
+    w.AHC_CHAT.refresh();
+    await new Promise(r => setTimeout(r, 200));
+    d.querySelector('.chat-chip').click();
+    await new Promise(r => setTimeout(r, 900));
+    chk('no img injected from a cell', !d.querySelector('.chat-log img'));
+    chk('no script injected from a cell', !d.querySelector('.chat-log script'));
+    // The LAST outbound bubble: the first is the genuine question asked above.
+    const outRows = d.querySelectorAll('.chat-row--out');
+    chk('tags rendered as text', /<img src=x/.test(outRows[outRows.length - 1].textContent),
+        outRows[outRows.length - 1].textContent.slice(0, 40));
+
+    L.click();
+    await new Promise(r => setTimeout(r, 200));
+    chk('panel closes again', P.hidden);
   }
 
   log('');

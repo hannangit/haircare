@@ -8,15 +8,19 @@
       <button type="button" class="x" id="m-close" aria-label="Close">&#10005;</button>
     </div>
     <div class="modal-bd">
-      <!-- No form, no form backend. Two ways through: message us, or pick a
-           slot. Both are configured in config.js, so a new site changes the
-           number and the booking link and nothing else. -->
+      <!-- No form, no form backend. Which buttons show depends on how the
+           panel was opened: Enquire offers WhatsApp and a phone call, Book
+           offers the scheduler. Both are configured in config.js, so a new
+           site changes the number and the booking link and nothing else. -->
       <p class="booking-notice" id="m-notice"></p>
       <div class="action-grid">
         <a class="btn btn-gold u-full" id="m-whatsapp" href="#" target="_blank" rel="noopener">
           <span data-icon="whatsapp" data-icon-size="18"></span> Message us on WhatsApp
         </a>
-        <button class="btn btn-outline u-full" type="button" id="m-book">
+        <a class="btn btn-outline u-full" id="m-call" href="#" hidden>
+          <span data-icon="phone" data-icon-size="18"></span> Call the salon
+        </a>
+        <button class="btn btn-gold u-full" type="button" id="m-book">
           <span data-icon="calendar" data-icon-size="18"></span> See available slots
         </button>
       </div>

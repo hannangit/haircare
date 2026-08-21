@@ -66,6 +66,7 @@
      and below the drawer, so an open menu isn't punctured by the WhatsApp and
      consultation buttons sitting on top of it. */
   --z-social: 180;
+  --z-chat: 205;
   --z-consult: 210;
   --z-scrim: 215;
   --z-drawer: 220;
@@ -436,7 +437,10 @@ section.block{padding:var(--space-section) 0}
 .back-link{display:inline-flex;gap:.4rem;align-items:center;min-height:44px;font-size:.82rem;font-weight:600;letter-spacing:.04em;color:var(--color-gold);margin-bottom:.8rem;cursor:pointer;transition:var(--transition-fast)}
 .back-link:hover{color:var(--color-gold-bright)}
 
-.rg-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:52px;align-items:center}
+.rg-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:start}
+/* The first rule inside a column must not push itself away from the top, or
+   the two columns start at different heights. */
+.rg-grid > div > .rule-labeled:first-child{margin-top:0}
 .rg-benefits{display:grid;gap:14px}
 .rg-item{display:flex;gap:18px;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:24px 26px}
 .rg-item .ic{flex:none;width:44px;height:44px;border-radius:100px;background:var(--tint-accent);border:1px solid var(--color-border);color:var(--color-gold);display:grid;place-items:center;font-weight:600}
@@ -452,15 +456,17 @@ section.block{padding:var(--space-section) 0}
 .ll-stat b{font-family:var(--font-display);font-size:2.8rem;font-weight:500;color:var(--color-gold);display:block;line-height:1;margin-bottom:.7rem}
 .ll-stat span{font-size:.85rem;color:var(--color-ink-secondary)}
 
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:40px 36px}
 .step .n{font-family:var(--font-display);font-size:2.6rem;color:var(--color-gold);font-weight:500;line-height:1}
-.step h4{font-size:1.05rem;margin:1rem 0 .55rem;color:var(--color-ink-primary)}
-.step p{font-size:.9rem;color:var(--color-ink-secondary)}
+.step h4{font-size:1.05rem;margin:1.15rem 0 .7rem;color:var(--color-ink-primary)}
+.step p{font-size:.93rem;line-height:1.75;color:var(--color-ink-secondary);max-width:34ch}
 .docs-panel{margin-top:40px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:36px;display:grid;grid-template-columns:1fr 1fr;gap:36px}
 .docs-panel h3{color:var(--color-ink-primary);font-size:1.3rem;margin-bottom:.4rem}
-.docs-panel .sub{font-size:.9rem;color:var(--color-ink-secondary);margin-bottom:1.1rem}
-.doc-list{list-style:none;display:grid;gap:12px}
-.doc-list li{display:flex;gap:14px;font-size:.93rem;line-height:1.65;padding-bottom:16px;border-bottom:1px solid var(--color-border)}
+.docs-panel .sub{font-size:.9rem;line-height:1.75;color:var(--color-ink-secondary);margin-bottom:1.1rem}
+.tab-panel > .sub{line-height:1.8;margin-bottom:1.6rem}
+.tab-panel > .sub:last-child{margin-bottom:0}
+.doc-list{list-style:none;display:grid;gap:18px}
+.doc-list li{display:flex;gap:16px;font-size:.93rem;line-height:1.8;padding-bottom:22px;border-bottom:1px solid var(--color-border)}
 .doc-list li:last-child{border-bottom:none}
 .doc-list .dm{flex:none;width:28px;height:28px;border-radius:100px;background:var(--tint-accent);border:1px solid var(--color-border);color:var(--color-gold);display:grid;place-items:center;font-size:.78rem;font-weight:600}
 .doc-list a{color:var(--color-gold);font-weight:600;text-decoration:underline;text-underline-offset:3px}
@@ -472,7 +478,7 @@ section.block{padding:var(--space-section) 0}
    Rendered by initHours() into any [data-hours] container. Today's row is
    highlighted, because that is the only row most visitors actually want. */
 .hours{border:1px solid var(--color-border);border-radius:var(--radius-md);overflow:hidden}
-.hours-row{display:flex;justify-content:space-between;gap:16px;padding:13px 18px;font-size:.92rem;border-bottom:1px solid var(--color-border)}
+.hours-row{display:flex;justify-content:space-between;gap:16px;padding:16px 20px;font-size:.92rem;line-height:1.5;border-bottom:1px solid var(--color-border)}
 .hours-row:last-child{border-bottom:none}
 .hours-row.is-today{background:var(--tint-accent)}
 .hours-day{color:var(--color-ink-secondary);font-weight:500}
@@ -520,6 +526,16 @@ section.block{padding:var(--space-section) 0}
 .team-avatar{width:80px;height:80px;border-radius:50%;background:var(--tint-accent-strong);border:1px solid var(--color-border);color:var(--color-gold);display:grid;place-items:center;margin:0 auto 20px;font-family:var(--font-display);font-size:1.5rem;font-weight:500}
 .team-card h4{font-size:1.15rem;margin-bottom:.5rem}
 .team-role{font-size:.88rem;color:var(--color-ink-secondary);margin-bottom:.5rem}
+/* Stylist photo, where the sheet supplies one. Same footprint as the
+   initials avatar so a mixed grid does not jump. */
+.team-photo{width:80px;height:80px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 20px;border:1px solid var(--color-border);filter:var(--media-filter)}
+.team-card--lead .team-photo{margin:0}
+.stylist-note{
+  margin:40px auto 0;max-width:62ch;text-align:center;
+  font-size:.95rem;line-height:1.8;color:var(--color-ink-secondary);
+  background:var(--tint-accent);border:1px solid var(--color-border);
+  border-radius:var(--radius-md);padding:22px 26px;
+}
 .team-links{display:flex;justify-content:center;gap:10px}
 .team-links a{width:auto;height:auto;min-height:42px;border-radius:100px;padding:0 18px;font-size:.8rem;font-weight:600;background:transparent;border:1px solid var(--color-border);color:var(--color-ink-primary);display:grid;place-items:center;transition:var(--transition-fast)}
 .team-links a:hover{background:var(--color-gold);color:var(--color-on-action);border-color:var(--color-gold)}
@@ -555,8 +571,10 @@ section.block{padding:var(--space-section) 0}
 .detail-feats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
 .detail-feats span{font-size:.8rem;background:var(--tint-1);border:1px solid var(--color-border);padding:.5rem 1rem;border-radius:100px;color:var(--color-ink-secondary)}
 .detail-feats span.bills{background:var(--color-success-bg);border-color:transparent;color:var(--color-success);font-weight:700}
-.map-embed{border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-border);filter:var(--media-filter)}
-.map-embed iframe{width:100%;height:280px;border:0;display:block}
+/* Stretches to the height of the column beside it. Left as a content-sized
+   box it floated in a half-empty column, which is what looked misaligned. */
+.map-embed{align-self:stretch;min-height:380px;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-border);filter:var(--media-filter)}
+.map-embed iframe{width:100%;height:100%;min-height:380px;border:0;display:block}
 .sidebar-card{border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px;position:sticky;top:104px}
 .sidebar-card .btn{width:100%;justify-content:center;margin-top:8px}
 .sidebar-note{font-size:.8rem;line-height:1.6;color:var(--color-ink-secondary);margin-top:16px;text-align:center}
@@ -586,7 +604,10 @@ footer ul a:hover{color:var(--color-gold)}
 .foot-bottom{padding-top:6px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:.78rem;color:var(--color-ink-secondary);opacity:.6}
 .footer-copyright{color:inherit}
 
-.wa{position:fixed;right:20px;bottom:20px;z-index:200;display:inline-flex;align-items:center;gap:.55rem;padding:.7rem 1.1rem;border-radius:100px;background:#1da851;color:#fff;font-weight:600;font-size:.9rem;box-shadow:var(--shadow-hover);transition:var(--transition-fast)}
+/* Retired: the chat widget now owns the bottom-right corner and offers the
+   same WhatsApp handover. Kept only so old markup does not reflow the page. */
+.wa{display:none !important}
+.wa--legacy{position:fixed;right:20px;bottom:20px;z-index:200;display:inline-flex;align-items:center;gap:.55rem;padding:.7rem 1.1rem;border-radius:100px;background:#1da851;color:#fff;font-weight:600;font-size:.9rem;box-shadow:var(--shadow-hover);transition:var(--transition-fast)}
 .wa svg{width:22px;height:22px;flex:none}
 .wa:hover{background:#179044;transform:translateY(-2px)}
 .wa:focus-visible{outline:3px solid var(--color-ink-primary);outline-offset:3px}
@@ -749,8 +770,10 @@ section.block--flush-top{padding-top:0}
 .zone-divider{height:1px;background:var(--color-border);border:0;margin:0}
 
 /* ---------- Tabs (used for dense content like documents / deposit) ---------- */
-.tabs{margin-top:8px}
-.tablist{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px}
+/* The steps above end in body text; without real separation the tab row
+   reads as a fifth step rather than a new control. */
+.tabs{margin-top:52px}
+.tablist{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:38px}
 .tab-btn{font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:12px 22px;min-height:44px;border-radius:100px;border:1px solid var(--color-border);background:transparent;color:var(--color-ink-secondary);cursor:pointer;transition:var(--transition-fast)}
 .tab-btn:hover{border-color:var(--color-border-hover);color:var(--color-ink-primary)}
 .tab-btn[aria-selected="true"]{background:var(--color-gold);border-color:var(--color-gold);color:var(--color-on-action)}
@@ -1109,3 +1132,160 @@ section.block--flush-top{padding-top:0}
 .calendly-popup-content iframe,
 .calendly-inline-widget iframe{background:var(--color-ink-800)}
 .calendly-inline-widget{min-height:700px}
+
+/* ---------- Chat widget ----------
+   Bottom-right. The old green WhatsApp bubble used to live here on mobile;
+   it is gone, because this widget offers the same WhatsApp handover and two
+   bubbles in one corner is clutter. Back-to-top stacks above the launcher. */
+.chat-launcher{
+  position:fixed;right:24px;bottom:24px;z-index:var(--z-chat);
+  width:58px;height:58px;border-radius:50%;
+  display:grid;place-items:center;
+  background:var(--color-action);color:var(--color-on-action);
+  border:none;cursor:pointer;
+  box-shadow:var(--shadow-hover);
+  transition:transform .2s ease,background .2s ease;
+}
+.chat-launcher:hover{transform:translateY(-2px)}
+.chat-launcher:focus-visible{outline:3px solid var(--color-ink-primary);outline-offset:3px}
+.chat-launcher-icon,.chat-launcher-close{grid-area:1/1;display:grid;place-items:center;transition:opacity .18s ease,transform .18s ease}
+.chat-launcher-close{font-size:1.1rem;opacity:0;transform:rotate(-90deg)}
+.chat-launcher.is-open .chat-launcher-icon{opacity:0;transform:rotate(90deg)}
+.chat-launcher.is-open .chat-launcher-close{opacity:1;transform:none}
+.chat-badge{
+  position:absolute;top:-2px;right:-2px;
+  min-width:20px;height:20px;padding:0 5px;border-radius:100px;
+  background:#e5484d;color:#fff;
+  font-size:.68rem;font-weight:700;line-height:20px;text-align:center;
+  border:2px solid var(--color-canvas);
+}
+
+.chat-panel{
+  position:fixed;right:24px;bottom:96px;z-index:var(--z-chat);
+  width:min(370px,calc(100vw - 32px));
+  max-height:min(560px,calc(100vh - 140px));
+  display:flex;flex-direction:column;overflow:hidden;
+  background:var(--color-surface-solid,var(--color-canvas));
+  border:1px solid var(--color-border-hover);
+  border-radius:var(--radius-lg,18px);
+  box-shadow:var(--shadow-hover);
+  animation:chatIn .22s ease;
+}
+.chat-panel[hidden]{display:none}
+@keyframes chatIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.chat-panel{animation:none}}
+
+.chat-hd{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;
+  background:var(--tint-accent-strong);
+  border-bottom:1px solid var(--color-border);
+}
+.chat-av{
+  flex:none;width:38px;height:38px;border-radius:50%;
+  display:grid;place-items:center;
+  background:var(--color-gold);color:var(--color-on-action);
+}
+.chat-hd-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.chat-hd-text b{font-size:.95rem;color:var(--color-ink-primary);line-height:1.3}
+.chat-status{display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--color-ink-secondary)}
+.chat-dot{width:7px;height:7px;border-radius:50%;background:#1da851;flex:none}
+.chat-x{
+  flex:none;width:32px;height:32px;border-radius:50%;
+  background:transparent;border:1px solid transparent;
+  color:var(--color-ink-secondary);font-size:.95rem;cursor:pointer;
+}
+.chat-x:hover{border-color:var(--color-border-hover);color:var(--color-ink-primary)}
+.chat-x:focus-visible{outline:2px solid var(--color-gold);outline-offset:2px}
+
+.chat-log{
+  flex:1;min-height:130px;overflow-y:auto;
+  padding:18px 16px;
+  display:flex;flex-direction:column;gap:12px;
+  background:var(--color-canvas);
+}
+.chat-row{display:flex}
+.chat-row--in{justify-content:flex-start}
+.chat-row--out{justify-content:flex-end}
+.chat-bubble{
+  max-width:85%;
+  padding:11px 14px;
+  font-size:.9rem;line-height:1.65;
+  border-radius:16px;
+}
+.chat-row--in .chat-bubble{
+  background:var(--color-surface);
+  border:1px solid var(--color-border);
+  border-bottom-left-radius:5px;
+  color:var(--color-ink-secondary);
+}
+.chat-row--out .chat-bubble{
+  background:var(--color-gold);
+  border-bottom-right-radius:5px;
+  color:var(--color-on-action);
+  font-weight:500;
+}
+.chat-typing{display:inline-flex;gap:4px;align-items:center;padding:3px 0}
+.chat-typing i{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--color-ink-secondary);opacity:.45;
+  animation:chatBlink 1.1s infinite ease-in-out;
+}
+.chat-typing i:nth-child(2){animation-delay:.18s}
+.chat-typing i:nth-child(3){animation-delay:.36s}
+@keyframes chatBlink{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:.9;transform:translateY(-3px)}}
+@media(prefers-reduced-motion:reduce){.chat-typing i{animation:none}}
+
+.chat-chips{
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:14px 16px;
+  border-top:1px solid var(--color-border);
+  background:var(--color-canvas);
+  max-height:224px;overflow-y:auto;
+}
+.chat-chip{
+  padding:9px 14px;
+  font-size:.82rem;line-height:1.4;text-align:left;
+  border-radius:100px;
+  border:1px solid var(--color-border-hover);
+  background:transparent;color:var(--color-ink-primary);
+  cursor:pointer;transition:var(--transition-fast);
+}
+.chat-chip:hover{border-color:var(--color-gold);color:var(--color-gold)}
+.chat-chip:focus-visible{outline:2px solid var(--color-gold);outline-offset:2px}
+.chat-chips-done{font-size:.82rem;line-height:1.6;color:var(--color-ink-secondary);margin:0}
+
+.chat-ft{padding:14px 16px;border-top:1px solid var(--color-border);background:var(--color-surface)}
+.chat-wa{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:12px 16px;min-height:46px;
+  border-radius:100px;
+  background:#1da851;color:#fff;
+  font-size:.88rem;font-weight:600;
+}
+.chat-wa:hover{background:#179044}
+.chat-wa:focus-visible{outline:3px solid var(--color-ink-primary);outline-offset:2px}
+.chat-wa svg{flex:none}
+.chat-disclaimer{margin:10px 0 0;font-size:.7rem;line-height:1.55;color:var(--color-ink-secondary);text-align:center}
+
+/* Back-to-top moves up out of the launcher's way, and shrinks a little so the
+   two do not read as a pair of equal buttons. */
+.to-top{bottom:96px;width:42px;height:42px}
+
+@media(max-width:768px){
+  .chat-launcher{right:16px;bottom:16px;width:54px;height:54px}
+  .chat-panel{
+    right:12px;left:12px;bottom:82px;width:auto;
+    max-height:min(70vh,calc(100vh - 120px));
+  }
+  .to-top{bottom:82px;right:18px}
+  /* The consultation card shares the bottom edge on mobile; lift it clear. */
+  .consult:not(.is-collapsed){bottom:16px}
+}
+
+/* Thin scrollbars: the panel is small enough that a default-width bar eats a
+   noticeable slice of every bubble. */
+.chat-log,.chat-chips{scrollbar-width:thin;scrollbar-color:var(--color-border-hover) transparent}
+.chat-log::-webkit-scrollbar,.chat-chips::-webkit-scrollbar{width:6px}
+.chat-log::-webkit-scrollbar-thumb,.chat-chips::-webkit-scrollbar-thumb{background:var(--color-border-hover);border-radius:100px}
+.chat-log::-webkit-scrollbar-track,.chat-chips::-webkit-scrollbar-track{background:transparent}

@@ -133,7 +133,8 @@
         var id = str(r.id), name = str(r.name);
         if (!id || !name) return;                       // skip this row only
         if (!/^[a-z0-9-]+$/i.test(id)) return;
-        var cat = str(r.category) || 'Other';
+        var cat = str(r.category) || "Other";
+        var photo = safeUrl(r.image_url);
         var hair = str(r.hair);
         hair = hair ? hair.toLowerCase() : null;
         parsed.push({
@@ -150,9 +151,10 @@
           description: str(r.description),
           feats: list(r.feats),
           sort: num(r.sort_order),
-          images: (typeof placeholderImage === 'function')
+          // A photo from the sheet wins; otherwise the generated artwork.
+          images: photo ? [photo] : ((typeof placeholderImage === "function")
             ? [placeholderImage(cat, name, 0), placeholderImage(cat, name, 1), placeholderImage(cat, name, 2)]
-            : [],
+            : []),
           alt: name + ' at African Hair Care'
         });
       });
@@ -175,6 +177,7 @@
           name: name,
           slug: str(r.slug) || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           blurb: str(r.blurb) || '',
+          image: safeUrl(r.image_url),
           sort: num(r.sort_order)
         });
       });
@@ -269,8 +272,9 @@
           role: str(r.role) || '',
           area: str(r.specialism) || '',
           quote: str(r.quote) || '',
-          phone: str(r.phone) || '',
-          email: str(r.email) || '',
+          // No phone or email. Clients ask for a stylist when they book, so
+          // the endpoint stopped publishing staff contact details entirely.
+          photo: safeUrl(r.image_url),
           lead: bool(r.is_lead) === true,
           sort: num(r.sort_order)
         });
@@ -280,6 +284,23 @@
         TEAM.length = 0;
         Array.prototype.push.apply(TEAM, pt);
         applied.push('team:' + pt.length);
+      }
+    }
+
+    // ---- faq (drives the chat widget) ----
+    var faq = rows(payload, 'faq');
+    if (faq && typeof FAQ !== 'undefined') {
+      var pf = [];
+      faq.forEach(function (r) {
+        var q = str(r.question), a = str(r.answer);
+        if (!q || !a) return;                          // half a Q&A helps nobody
+        pf.push({ q: q, a: a, sort: num(r.sort_order) });
+      });
+      if (pf.length) {
+        sortBy(pf);
+        FAQ.length = 0;
+        Array.prototype.push.apply(FAQ, pf);
+        applied.push('faq:' + pf.length);
       }
     }
 
@@ -298,6 +319,8 @@
       if (str(s.consult_body))      CONFIG.consultBody  = str(s.consult_body);
       if (str(s.consult_cta))       CONFIG.consultCta   = str(s.consult_cta);
       if (str(s.intro_text))        CONFIG.introText    = str(s.intro_text);
+      if (str(s.chat_greeting))     CONFIG.chatGreeting = str(s.chat_greeting);
+      if (str(s.stylist_note))      CONFIG.stylistNote  = str(s.stylist_note);
       applied.push('settings');
     }
 
@@ -402,7 +425,8 @@
         OPENING_HOURS: OPENING_HOURS,
         TICKER_MESSAGES: TICKER_MESSAGES,
         SERVICE_DEFAULTS: SERVICE_DEFAULTS,
-        TEAM: (typeof TEAM !== "undefined" ? TEAM : null)
+        TEAM: (typeof TEAM !== "undefined" ? TEAM : null),
+        FAQ: (typeof FAQ !== "undefined" ? FAQ : null)
       };
     }
   };
