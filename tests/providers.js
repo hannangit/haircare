@@ -211,5 +211,106 @@ async function ready(f) {
   }
 
   log('');
+  log('=== I. One cell renames the business everywhere ===');
+  {
+    const { w, d } = await ready(await frame('../index.html'));
+    w.AHC.apply({ ok: true, tabs: { contact: [
+      { key: 'business_name', value: 'Shadai Beauty Rooms' },
+      { key: 'phone', value: '07123 456789' },
+      { key: 'email_general', value: 'hi@shadai.co.uk' }
+    ] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 300));
+    chk('header brand renamed', d.querySelector('.brand').textContent === 'Shadai Beauty Rooms',
+        d.querySelector('.brand').textContent);
+    chk('footer brand renamed', d.querySelector('.foot-brand').textContent === 'Shadai Beauty Rooms');
+    chk('legal line renamed', /^Shadai Beauty Rooms Ltd/.test(d.querySelector('.footer-legal p').textContent.trim()),
+        d.querySelector('.footer-legal p').textContent.trim());
+    chk('copyright renamed', /Shadai Beauty Rooms Ltd$/.test(d.querySelector('.footer-copyright').textContent.trim()));
+    chk('phone follows', d.querySelector('[data-contact="phone"]').textContent === '07123 456789');
+    chk('email follows', d.querySelector('[data-contact="email"]').textContent === 'hi@shadai.co.uk');
+    chk('whatsapp link rebuilt from the new number',
+        d.querySelector('[data-contact-href="whatsapp"]').getAttribute('href').indexOf('wa.me/447123456789') !== -1,
+        d.querySelector('[data-contact-href="whatsapp"]').getAttribute('href').slice(0, 40));
+  }
+
+  log('');
+  log('=== J. Homepage hero comes from the sheet ===');
+  {
+    const { w, d } = await ready(await frame('../index.html'));
+    w.AHC.apply({ ok: true, tabs: { settings: [
+      { key: 'hero_eyebrow', value: 'Bletchley, Milton Keynes' },
+      { key: 'hero_title', value: 'Textured hair, *properly looked after*.' },
+      { key: 'hero_text', value: 'A new paragraph straight from the spreadsheet.' }
+    ] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 300));
+    const h1 = d.querySelector('#zone-hero');
+    chk('eyebrow from the sheet', d.querySelector('.ghero-in .eyebrow').textContent === 'Bletchley, Milton Keynes');
+    chk('headline from the sheet', h1.textContent === 'Textured hair, properly looked after.', h1.textContent);
+    chk('*asterisks* became the gold accent',
+        !!h1.querySelector('em') && h1.querySelector('em').textContent === 'properly looked after');
+    chk('paragraph from the sheet',
+        /straight from the spreadsheet/.test(d.querySelector('.ghero-in p').textContent));
+
+    // The rich field escapes first, so a cell can add emphasis and nothing else.
+    w.AHC.apply({ ok: true, tabs: { settings: [
+      { key: 'hero_title', value: '<img src=x onerror=alert(1)> *ok*' }
+    ] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 200));
+    chk('no img injected through the headline', !h1.querySelector('img'));
+    chk('tags shown as text', /<img src=x/.test(h1.textContent), h1.textContent.slice(0, 34));
+    chk('emphasis still works alongside', !!h1.querySelector('em'));
+  }
+
+  log('');
+  log('=== K. Reviews widget is configured from the sheet ===');
+  {
+    const { w, d } = await ready(await frame('../index.html'));
+    await new Promise(r => setTimeout(r, 900));
+
+    w.AHC.apply({ ok: true, tabs: { settings: [
+      { key: 'reviews_provider', value: 'iframe' },
+      { key: 'reviews_id', value: 'https://example.com/google-reviews' }
+    ] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 300));
+    let ifr = d.querySelector('#reviews-embed iframe');
+    chk('google/facebook embed swapped in from the sheet',
+        !!ifr && ifr.src.indexOf('example.com/google-reviews') !== -1, ifr ? ifr.src : 'none');
+
+    // Unchanged config must not re-inject the third-party embed.
+    const before = d.querySelector('#reviews-embed').innerHTML;
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 200));
+    chk('re-render with no change is a no-op',
+        d.querySelector('#reviews-embed').innerHTML === before);
+
+    w.AHC.apply({ ok: true, tabs: { settings: [
+      { key: 'reviews_provider', value: 'iframe' },
+      { key: 'reviews_id', value: 'javascript:alert(1)' }
+    ] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 200));
+    chk('javascript: reviews id refused at the sheet boundary',
+        !d.querySelector('#reviews-embed iframe'));
+
+    // Per-page override: the embed asks for a named key, the sheet answers.
+    const host = d.getElementById('reviews-embed');
+    host.setAttribute('data-reviews-key', 'services');
+    w.AHC.apply({ ok: true, tabs: { settings: [
+      { key: 'reviews_provider', value: 'iframe' },
+      { key: 'reviews_id', value: 'https://example.com/default' },
+      { key: 'reviews_id_services', value: 'https://example.com/services-only' }
+    ] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 300));
+    ifr = d.querySelector('#reviews-embed iframe');
+    chk('per-page reviews id wins over the default',
+        !!ifr && ifr.src.indexOf('services-only') !== -1, ifr ? ifr.src : 'none');
+  }
+
+  log('');
   log(fails === 0 ? '=== ALL PROVIDER TESTS PASSED ===' : '=== ' + fails + ' FAILED ===');
 })().catch(e => { log(''); log('HARNESS ERROR: ' + e.message); log(e.stack); });

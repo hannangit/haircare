@@ -73,12 +73,12 @@ overwritten.
 |---|---|---|
 | `services` | service | `name`, `category`, `price`, `duration_mins`, `description`, `feats`, `image_url`, `active` |
 | `categories` | filter group | `name` (must match `services.category` exactly), `slug`, `blurb`, `image_url` |
-| `contact` | detail | `key`, `value` — `phone`, `email_general`, `address`, `maps_query`, … |
+| `contact` | detail | `key`, `value` — `business_name`, `phone`, `email_general`, `address`, `maps_query`, … |
 | `hours` | day | `day`, `hours` (**blank = Closed**), `sort_order` |
 | `promos` | ticker message | `message`, `start_date`, `end_date` — dates schedule offers |
 | `team` | staff member | `name`, `role`, `specialism`, `image_url`, `is_lead` |
 | `faq` | chat question | `question`, `answer` — drives the chat widget, first 8 shown |
-| `settings` | site value | `key`, `value` — `deposit`, `cancellation_hours`, consultation and chat copy |
+| `settings` | site value | `key`, `value` — `deposit`, `hero_*` (home page headline), `reviews_*`, consultation and chat copy |
 
 Rules that apply everywhere:
 
@@ -94,6 +94,38 @@ Rules that apply everywhere:
   can live in the same tab and will never be published. `team` ships with
   `phone_private` and `email_private` for exactly this reason — the site does
   not show staff contact details, so the endpoint does not publish them.
+
+### The two that surprise people
+
+**The business name is a cell.** `contact` → `business_name` renames the header,
+the footer, the legal line and the copyright in one edit. Page `<title>` tags
+and meta descriptions stay in the HTML on purpose — they are SEO, they should
+not change under you, and a crawler must see them without running JavaScript.
+
+**The reviews widget is a cell too.** `settings` → `reviews_provider` +
+`reviews_id`:
+
+| provider | what `reviews_id` holds |
+|---|---|
+| `jotform` | the JotForm website-widget id |
+| `iframe` | a full `https://` embed URL — Google, Facebook, Elfsight, Trustpilot |
+| `none` | nothing; the section hides itself |
+
+Anything that is not a plain widget id or an `https://` URL is refused before it
+can reach a `src`.
+
+To show a **different reviews page on one particular page**, add a settings row
+`reviews_id_<name>` (e.g. `reviews_id_services`) and put
+`data-reviews-key="services"` on that page's `#reviews-embed`. Without the
+attribute every page shares `reviews_id`.
+
+### The home page headline
+
+`settings` → `hero_eyebrow`, `hero_title`, `hero_text`. In `hero_title`,
+`*asterisks*` mark the words that get the gold accent:
+`Afro hair care, *done properly*.` That is the only place a cell may produce a
+tag, and the value is HTML-escaped first, so a cell containing real markup is
+still shown as plain text.
 
 ### `image_url` — the one that catches people out
 
@@ -116,14 +148,18 @@ picture, and will render as a broken image. Anything that is not plainly
 
 ## Step 4 — Fill in `config.js`
 
+Only `sheetEndpoint` truly has to be right here. Everything else in this table
+is a **fallback** that the sheet overrides once it is live, so getting it
+roughly right and finishing in the spreadsheet is fine.
+
 | Setting | What to put |
 |---|---|
-| `businessName` | Used in WhatsApp messages and alt text |
+| `businessName` | Fallback only — `contact` → `business_name` renames it everywhere |
 | `sheetEndpoint` | The `/exec` URL from step 3 |
 | `bookingProvider` | `'calendly'`, `'google'`, or `'none'` |
 | `bookingUrl` | Calendly link, or Google appointment-schedule link |
-| `reviewsProvider` | `'jotform'`, `'iframe'`, or `'none'` |
-| `reviewsId` | JotForm widget ID, or a full `https://` embed URL |
+| `reviewsProvider` | Fallback only — `settings` → `reviews_provider` wins |
+| `reviewsId` | Fallback only — `settings` → `reviews_id` wins |
 | `phone` | One number. `tel:` and WhatsApp are derived from it |
 | `whatsappNumber` | Only if WhatsApp is a *different* number to `phone` |
 | `email`, `emailFeedback`, `address`, `mapsQuery` | Contact details |

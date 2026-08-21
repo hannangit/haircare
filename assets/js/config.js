@@ -76,9 +76,19 @@ const CONFIG = {
     'Hi! Tap a question below, or message us on WhatsApp and a real person ' +
     'will answer.',
   stylistNote:
-    'Prefer a particular stylist? Mention their name when you book. We will ' +
-    'call you to confirm they are free, so please leave a time that suits ' +
-    'you for a call back.'
+    'Already know who you want? Name them when you book. We’ll call to ' +
+    'confirm they’re free that day, so leave us a good time to reach you.',
+
+  /* ── 10. HOMEPAGE HERO ────────────────────────────────────────────────────
+     Overridden by the `settings` tab (hero_eyebrow, hero_title, hero_text).
+     In the title, *asterisks* mark the words that get the gold accent.      */
+  heroEyebrow: 'Central Milton Keynes',
+  heroTitle:   'Afro hair care, *done properly*.',
+  heroText:
+    'Braids, locs, weaves, natural hair and beauty — by stylists who have ' +
+    'worked with textured hair their whole careers. Every appointment starts ' +
+    'with a free consultation, so you leave with the style you actually ' +
+    'asked for.'
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════

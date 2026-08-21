@@ -60,6 +60,17 @@
     return s;
   }
 
+  /* A reviews id is one of two things: a bare widget id (JotForm) or a full
+     https:// embed URL (Google, Facebook, Elfsight, Trustpilot). Anything else
+     — a javascript: URL, a Drive link, a sentence — is refused here so it can
+     never reach a src. */
+  function reviewsValue(v) {
+    var s = str(v);
+    if (!s) return null;
+    if (/^https?:\/\//i.test(s)) return safeUrl(s);
+    return /^[A-Za-z0-9_-]{6,}$/.test(s) ? s : null;
+  }
+
   /* Lists split on newline (or pipe), never on comma, so an address or a
      feature like "Small, medium or large" survives as one item. */
   function list(v) {
@@ -193,6 +204,8 @@
     var contact = rows(payload, 'contact');
     if (contact) {
       var c = kv(contact), patch = {};
+      // One cell renames the business everywhere it appears on the page.
+      if (str(c.business_name))   patch.businessName = str(c.business_name);
       if (str(c.phone))           patch.phone = str(c.phone);
       if (str(c.email_general))   patch.email = str(c.email_general);
       if (str(c.email_feedback))  patch.emailFeedback = str(c.email_feedback);
@@ -321,6 +334,31 @@
       if (str(s.intro_text))        CONFIG.introText    = str(s.intro_text);
       if (str(s.chat_greeting))     CONFIG.chatGreeting = str(s.chat_greeting);
       if (str(s.stylist_note))      CONFIG.stylistNote  = str(s.stylist_note);
+      if (str(s.hero_eyebrow))      CONFIG.heroEyebrow  = str(s.hero_eyebrow);
+      if (str(s.hero_title))        CONFIG.heroTitle    = str(s.hero_title);
+      if (str(s.hero_text))         CONFIG.heroText     = str(s.hero_text);
+
+      // Reviews widget, so a new site never edits code to change it.
+      var rp = str(s.reviews_provider);
+      if (rp) CONFIG.reviewsProvider = rp.toLowerCase();
+      if (str(s.reviews_id)) CONFIG.reviewsId = reviewsValue(s.reviews_id);
+
+      /* Any settings key of the form reviews_id_<name> is a per-page override,
+         picked up by an embed carrying data-reviews-key="<name>". Collected
+         here so providers.js stays a lookup and never parses the sheet. */
+      var byId = {};
+      Object.keys(s).forEach(function (k) {
+        var m = /^reviews_id_(.+)$/.exec(k);
+        if (!m) return;
+        var v = reviewsValue(s[k]);
+        if (!v) return;
+        // str() yields null, not '', for a missing key — so guard before
+        // lowercasing rather than relying on ||.
+        var pv = str(s['reviews_provider_' + m[1]]);
+        byId[m[1]] = { id: v, provider: pv ? pv.toLowerCase() : null };
+      });
+      if (Object.keys(byId).length) CONFIG.reviewsById = byId;
+
       applied.push('settings');
     }
 

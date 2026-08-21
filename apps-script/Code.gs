@@ -358,6 +358,7 @@ var SCHEMA = {
       active: 'FALSE ignores this row.'
     },
     rows: [
+      ['business_name', 'Example Hair Care', 'TRUE'],
       ['phone', '+44 7700 900123', 'TRUE'],
       ['email_general', 'hello@example.co.uk', 'TRUE'],
       ['email_feedback', 'feedback@example.co.uk', 'TRUE'],
@@ -456,8 +457,8 @@ var SCHEMA = {
   settings: {
     headers: ['key', 'value', 'active'],
     notes: {
-      key: 'Do NOT rename or delete these keys.',
-      value: 'The value used on the site.',
+      key: 'Do NOT rename or delete these keys. hero_* is the big text at the top of the home page. reviews_* is the reviews widget.',
+      value: 'The value used on the site. In hero_title, put *asterisks* round the words you want in gold. reviews_id is either a JotForm widget id or a full https:// embed link for Google or Facebook reviews.',
       active: 'FALSE ignores this row.'
     },
     rows: [
@@ -469,7 +470,12 @@ var SCHEMA = {
       ['consult_cta', 'Book my consultation', 'TRUE'],
       ['intro_text', '', 'TRUE'],
       ['chat_greeting', 'Hi! Tap a question below, or message us on WhatsApp and a real person will answer.', 'TRUE'],
-      ['stylist_note', 'Prefer a particular stylist? Mention their name when you book. We will call you to confirm they are free, so please leave a time that suits you for a call back.', 'TRUE']
+      ['stylist_note', 'Already know who you want? Name them when you book. We will call to confirm they are free that day, so leave us a good time to reach you.', 'TRUE'],
+      ['hero_eyebrow', 'Your Town', 'TRUE'],
+      ['hero_title', 'Afro hair care, *done properly*.', 'TRUE'],
+      ['hero_text', 'One or two sentences on what you do and why someone should walk in.', 'TRUE'],
+      ['reviews_provider', 'jotform', 'TRUE'],
+      ['reviews_id', '', 'TRUE']
     ],
     bools: ['active']
   }
@@ -495,12 +501,22 @@ var INSTRUCTIONS = [
   ['WHAT EACH TAB DOES', ''],
   ['services', 'Every service, its price, how long it takes and its description. The main one you will edit.'],
   ['categories', 'The groups services are filtered by. A category name here must match the category typed on the service, letter for letter.'],
-  ['contact', 'Phone, email, address. Changing the phone here changes it everywhere, including the WhatsApp buttons.'],
+  ['contact', 'Business name, phone, email, address. Change one here and it changes everywhere on the site - the header, the footer, the legal line and the WhatsApp buttons all read from this tab.'],
   ['hours', 'Opening times. Leave the hours cell blank for a day you are closed.'],
   ['promos', 'The scrolling offers bar at the top of every page. Offers only. Set an end date and it removes itself.'],
   ['team', 'Your stylists. The last two columns are for your reference and are never published.'],
   ['faq', 'The questions in the chat window at the bottom right of every page. Anything asked more than twice belongs here.'],
-  ['settings', 'Deposit, cancellation window, and the wording of the consultation box and chat greeting.'],
+  ['settings', 'Deposit, cancellation window, the big text at the top of the home page (hero_*), the reviews widget (reviews_*), and the wording of the consultation box and chat greeting.'],
+  ['', ''],
+  ['THE HOME PAGE HEADLINE', ''],
+  ['hero_eyebrow', 'The small gold line above the headline. Usually the town.'],
+  ['hero_title', 'The headline itself. Put *asterisks* round the words you want in gold: Afro hair care, *done properly*.'],
+  ['hero_text', 'The paragraph under the headline. One or two sentences.'],
+  ['', ''],
+  ['REVIEWS', ''],
+  ['reviews_provider', 'jotform for a JotForm widget id, iframe for a full https:// embed link (Google, Facebook, Elfsight, Trustpilot), or none to hide the section.'],
+  ['reviews_id', 'The widget id or the https:// embed link. Anything else is ignored.'],
+  ['', 'Want a DIFFERENT reviews page on a particular page of the site? Add a row named reviews_id_<name> - for example reviews_id_services - and ask your developer to tag that page with the same name. Without that, every page shows reviews_id.'],
   ['', ''],
   ['ADDING PHOTOS', ''],
   ['', 'The image_url column takes a link to the picture file itself - it should end .jpg, .png or .webp.'],

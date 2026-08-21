@@ -137,23 +137,55 @@
     if (h) h.hidden = false;
   }
 
-  /* ─── Reviews ───────────────────────────────────────────────────────────*/
+  /* ─── Reviews ───────────────────────────────────────────────────────────
+     Configured from the sheet (settings: reviews_provider, reviews_id), so a
+     new site never edits code to change its reviews widget.
+
+     A page that wants its OWN reviews puts data-reviews-key="something" on the
+     embed, and the sheet answers with reviews_id_something. That is how one
+     site shows a different Google or Facebook reviews page per page; without
+     the attribute every page shares the single reviews_id. */
+  var lastReviewsKey = null;
+
+  function reviewsFor(host) {
+    var suffix = host.getAttribute('data-reviews-key');
+    var provider = CONFIG.reviewsProvider;
+    var id = CONFIG.reviewsId;
+    if (suffix) {
+      var per = CONFIG.reviewsById && CONFIG.reviewsById[suffix];
+      if (per) {
+        if (per.id) id = per.id;
+        if (per.provider) provider = per.provider;
+      }
+    }
+    return { provider: String(provider || 'none').toLowerCase(), id: id };
+  }
+
   function renderReviews() {
     var host = document.getElementById('reviews-embed');
     if (!host) return;
-    var p = String(CONFIG.reviewsProvider || "none").toLowerCase();
-    var id = CONFIG.reviewsId;
+    var cfg = reviewsFor(host);
+    var p = cfg.provider;
+    var id = cfg.id;
+
+    // Re-rendering an unchanged widget would re-inject the third-party script
+    // on every render pass, so nothing happens unless something moved.
+    var key = p + '|' + (id || '');
+    if (key === lastReviewsKey) return;
+    lastReviewsKey = key;
 
     // Clear first: a rejected or changed provider must not leave the previous
     // embed sitting there.
     host.innerHTML = "";
 
+    // Hidden rather than removed: the sheet may still be in flight, and a
+    // removed section cannot come back when it lands.
+    var section = host.closest('section');
     if (p === 'none' || !id) {
-      // Remove the whole section rather than leaving an empty heading.
-      var section = host.closest('section');
-      if (section) section.remove();
+      if (section) section.hidden = true;      // no empty heading left behind
       return;
     }
+    if (section) section.hidden = false;
 
     if (p === 'jotform') {
       host.innerHTML = '<div id="JFWebsiteWidget-' + esc(id) + '"></div>';

@@ -479,6 +479,7 @@ function renderContact() {
   const wa = CONFIG.whatsapp || (window.AHC ? AHC.waLink(CONFIG.phone) : '');
   const tel = CONFIG.phoneHref || (window.AHC ? AHC.telHref(CONFIG.phone) : '');
   const values = {
+    business: CONFIG.businessName,
     phone: CONFIG.phone,
     email: CONFIG.email,
     emailFeedback: CONFIG.emailFeedback,
@@ -585,11 +586,24 @@ function renderCopy() {
     'consult-title': CONFIG.consultTitle,
     'consult-body': CONFIG.consultBody,
     'consult-cta': CONFIG.consultCta,
-    'chair-rent': CONFIG.chairRent
+    'chair-rent': CONFIG.chairRent,
+    'hero-eyebrow': CONFIG.heroEyebrow,
+    'hero-title': CONFIG.heroTitle,
+    'hero-text': CONFIG.heroText
   };
   document.querySelectorAll('[data-copy]').forEach(el => {
     const v = map[el.dataset.copy];
     if (v) el.textContent = v;
+  });
+
+  /* The one place a cell may produce markup, and only one tag: *asterisks*
+     become the accent span. Escaped FIRST, so a cell containing real tags is
+     still shown as text — the asterisk pass only ever adds <em>. */
+  document.querySelectorAll('[data-copy-rich]').forEach(el => {
+    const v = map[el.dataset.copyRich];
+    if (!v) return;
+    const esc = window.AHC ? AHC.escHtml : (s => s);
+    el.innerHTML = esc(v).replace(/\*([^*]+)\*/g, '<em>$1</em>');
   });
   document.querySelectorAll('[data-deposit]').forEach(el => {
     if (SERVICE_DEFAULTS.deposit !== null && SERVICE_DEFAULTS.deposit !== undefined) {
@@ -610,6 +624,10 @@ function renderAll() {
   renderSearch();
   renderTeam();
   if (window.AHC_CHAT) AHC_CHAT.refresh();   // the sheet may have new questions
+  // The reviews widget is configured from the sheet too. renderReviews only
+  // does work when the provider or id has actually changed, so calling it on
+  // every render pass does not re-inject the third-party script.
+  if (window.PROVIDERS) PROVIDERS.renderReviews();
   initIcons();          // re-scan: freshly rendered markup contains data-icon
 }
 window.AHC_RENDER = renderAll;
