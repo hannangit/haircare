@@ -32,6 +32,7 @@ var PUBLISHED = {
   team:       ['name', 'role', 'specialism', 'quote', 'image_url',
                'is_lead', 'sort_order'],
   faq:        ['question', 'answer', 'sort_order'],
+  reviews:    ['name', 'provider', 'id', 'page', 'sort_order'],
   settings:   ['key', 'value']
 };
 
@@ -454,6 +455,23 @@ var SCHEMA = {
     bools: ['active']
   },
 
+  reviews: {
+    headers: ['name', 'provider', 'id', 'page', 'sort_order', 'active'],
+    notes: {
+      name: 'The label on the tab, e.g. Google or Facebook. With only one row there is no tab strip and this is not shown.',
+      provider: 'iframe for a normal https:// embed link (Google, Facebook, Elfsight, Trustpilot). jotform for a JotForm website-widget id.',
+      id: 'The embed link, or the JotForm widget id. Must be a plain https:// link or an id - anything else is ignored.',
+      page: 'Leave BLANK to show on every page. Fill it in only if this one belongs to a single page, and ask your developer to tag that page with the same word.',
+      sort_order: 'Left to right. The first one is the tab that opens.',
+      active: 'FALSE hides this source. Set every row FALSE to hide reviews entirely.'
+    },
+    rows: [
+      ['Google', 'iframe', '', '', 1, 'TRUE'],
+      ['Facebook', 'iframe', '', '', 2, 'FALSE']
+    ],
+    bools: ['active']
+  },
+
   settings: {
     headers: ['key', 'value', 'active'],
     notes: {
@@ -506,6 +524,7 @@ var INSTRUCTIONS = [
   ['promos', 'The scrolling offers bar at the top of every page. Offers only. Set an end date and it removes itself.'],
   ['team', 'Your stylists. The last two columns are for your reference and are never published.'],
   ['faq', 'The questions in the chat window at the bottom right of every page. Anything asked more than twice belongs here.'],
+  ['reviews', 'Where your reviews come from. One row per source - add Google and Facebook and the site shows a tab for each.'],
   ['settings', 'Deposit, cancellation window, the big text at the top of the home page (hero_*), the reviews widget (reviews_*), and the wording of the consultation box and chat greeting.'],
   ['', ''],
   ['THE HOME PAGE HEADLINE', ''],
@@ -514,9 +533,13 @@ var INSTRUCTIONS = [
   ['hero_text', 'The paragraph under the headline. One or two sentences.'],
   ['', ''],
   ['REVIEWS', ''],
-  ['reviews_provider', 'jotform for a JotForm widget id, iframe for a full https:// embed link (Google, Facebook, Elfsight, Trustpilot), or none to hide the section.'],
-  ['reviews_id', 'The widget id or the https:// embed link. Anything else is ignored.'],
-  ['', 'Want a DIFFERENT reviews page on a particular page of the site? Add a row named reviews_id_<name> - for example reviews_id_services - and ask your developer to tag that page with the same name. Without that, every page shows reviews_id.'],
+  ['', 'Reviews live on their own tab, one row per place you collect them. To show Google AND Facebook, add a row for each and give them names - the site puts a tab above the reviews for each one, and only loads the one being looked at.'],
+  ['name', 'The label on the tab: Google, Facebook, Trustpilot. Not shown when there is only one row.'],
+  ['provider', 'iframe for a normal https:// embed link. jotform for a JotForm widget id.'],
+  ['id', 'The embed link or the widget id.'],
+  ['page', 'Blank shows it on every page. Fill it in only to tie a source to one page.'],
+  ['', 'To turn reviews off completely, set every row to active = FALSE.'],
+  ['', 'The older reviews_provider and reviews_id rows on the settings tab still work if the reviews tab is empty and has never been used.'],
   ['', ''],
   ['ADDING PHOTOS', ''],
   ['', 'The image_url column takes a link to the picture file itself - it should end .jpg, .png or .webp.'],

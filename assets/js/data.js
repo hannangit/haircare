@@ -317,6 +317,35 @@
       }
     }
 
+    // ---- reviews (one row per source: Google, Facebook, ...) ----
+    var revs = rows(payload, 'reviews');
+    if (revs && typeof REVIEW_SOURCES !== 'undefined') {
+      var pr = [];
+      revs.forEach(function (r) {
+        var id = reviewsValue(r.id);
+        if (!id) return;                        // a row with no usable embed
+        var prov = str(r.provider);
+        pr.push({
+          name: str(r.name) || 'Reviews',
+          provider: (prov ? prov.toLowerCase() : 'iframe'),
+          id: id,
+          page: str(r.page) || '',              // blank = every page
+          sort: num(r.sort_order)
+        });
+      });
+      // Assigned even when empty: setting every row to FALSE is how the owner
+      // turns the section off, so it must not fall back to a stale list.
+      sortBy(pr);
+      REVIEW_SOURCES.length = 0;
+      Array.prototype.push.apply(REVIEW_SOURCES, pr);
+      // rows() gives null for a tab that does not exist and [] for one that is
+      // empty. That difference is the whole point here: an older sheet with no
+      // reviews tab keeps using the single settings pair, while a sheet that
+      // HAS the tab and emptied it means "no reviews", not "fall back".
+      CONFIG.reviewsTabPresent = true;
+      applied.push('reviews:' + pr.length);
+    }
+
     // ---- settings (key/value) ----
     var settings = rows(payload, 'settings');
     if (settings) {
@@ -464,7 +493,8 @@
         TICKER_MESSAGES: TICKER_MESSAGES,
         SERVICE_DEFAULTS: SERVICE_DEFAULTS,
         TEAM: (typeof TEAM !== "undefined" ? TEAM : null),
-        FAQ: (typeof FAQ !== "undefined" ? FAQ : null)
+        FAQ: (typeof FAQ !== "undefined" ? FAQ : null),
+        REVIEW_SOURCES: (typeof REVIEW_SOURCES !== "undefined" ? REVIEW_SOURCES : null)
       };
     }
   };

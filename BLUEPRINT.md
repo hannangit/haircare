@@ -53,7 +53,7 @@ does not change.
 2. **Extensions → Apps Script**, delete the placeholder, paste **all** of
    `apps-script/Code.gs`, save.
 3. In the toolbar pick **`setupSheet`** and press **Run**. Approve the
-   permission prompt once. It creates an **INSTRUCTIONS** tab plus all eight
+   permission prompt once. It creates an **INSTRUCTIONS** tab plus all nine
    content tabs — headers, a hover note on every column explaining it,
    TRUE/FALSE dropdowns, frozen header row — and one example row per tab
    showing the expected format.
@@ -67,7 +67,7 @@ overwritten.
 > (*File → Import → Upload → Replace current sheet*). That reproduces this
 > site's 25 services exactly.
 
-### The eight tabs
+### The nine tabs
 
 | Tab | One row per | Key columns |
 |---|---|---|
@@ -78,6 +78,7 @@ overwritten.
 | `promos` | ticker message | `message`, `start_date`, `end_date` — dates schedule offers |
 | `team` | staff member | `name`, `role`, `specialism`, `image_url`, `is_lead` |
 | `faq` | chat question | `question`, `answer` — drives the chat widget, first 8 shown |
+| `reviews` | reviews source | `name`, `provider`, `id` — one row per source, e.g. Google and Facebook |
 | `settings` | site value | `key`, `value` — `deposit`, `hero_*` (home page headline), `reviews_*`, consultation and chat copy |
 
 Rules that apply everywhere:
@@ -102,7 +103,8 @@ the footer, the legal line and the copyright in one edit. Page `<title>` tags
 and meta descriptions stay in the HTML on purpose — they are SEO, they should
 not change under you, and a crawler must see them without running JavaScript.
 
-**The reviews widget is a cell too.** `settings` → `reviews_provider` +
+**The reviews widget is a tab.** See below — Google and Facebook can sit
+side by side. The single-widget form is `settings` → `reviews_provider` +
 `reviews_id`:
 
 | provider | what `reviews_id` holds |
@@ -118,6 +120,35 @@ To show a **different reviews page on one particular page**, add a settings row
 `reviews_id_<name>` (e.g. `reviews_id_services`) and put
 `data-reviews-key="services"` on that page's `#reviews-embed`. Without the
 attribute every page shares `reviews_id`.
+
+### Reviews: Google *and* Facebook
+
+Reviews come from their own **`reviews` tab** — one row per place you collect
+them:
+
+| name | provider | id | page | sort_order | active |
+|---|---|---|---|---|---|
+| Google | `iframe` | `https://…` | | 1 | TRUE |
+| Facebook | `iframe` | `https://…` | | 2 | TRUE |
+
+- **One active row** — embedded on its own, no tab strip.
+- **Two or more** — a tab strip appears above the embed, labelled by `name`,
+  in `sort_order`. **Only the visible one loads**; the others load the first
+  time someone opens them, so three widgets never cost three page loads.
+- **`provider`** — `iframe` for a normal `https://` embed link (Google,
+  Facebook, Elfsight, Trustpilot), `jotform` for a JotForm widget id.
+- **`page`** — blank shows the source on every page. Fill it in to tie a source
+  to one page, and put `data-reviews-key="<same word>"` on that page's
+  `#reviews-embed`.
+- **Turning reviews off** — set every row to `active = FALSE`; the section
+  hides itself rather than leaving an empty heading.
+
+A row whose `id` is not a plain widget id or `https://` URL is dropped, and the
+other rows still render — one bad cell cannot take the section down.
+
+The older single-widget `settings` rows (`reviews_provider`, `reviews_id`) still
+work, and are used when the `reviews` tab does not exist at all. Once the tab
+exists, it wins.
 
 ### The home page headline
 
@@ -213,6 +244,7 @@ assertions, all should pass. Then spot-check by hand:
 | Offers / ticker (with date ranges) | Sheet → `promos` | Owner |
 | Staff, and their photos | Sheet → `team` | Owner |
 | Chat questions and answers | Sheet → `faq` | Owner |
+| Reviews sources (Google, Facebook) | Sheet → `reviews` | Owner |
 | Deposit, cancellation window, consultation + chat copy | Sheet → `settings` | Owner |
 | Endpoint, booking + reviews providers, phone | `assets/js/config.js` | You, once |
 | Fallback copy of all sheet content | `config.js` + `services-data.js` | You, once |
@@ -263,7 +295,7 @@ loading spinner anywhere.
 [ ] Deployed as web app, access = Anyone, /exec returns {"ok":true
 [ ] config.js filled in (9 sections)
 [ ] bash build.sh
-[ ] Both test suites pass (110 assertions)
+[ ] Both test suites pass (142 assertions)
 [ ] Chat widget opens, a question answers, WhatsApp handover works
 [ ] Deployed to Pages / Cloudflare
 [ ] Placeholder content replaced (see README checklist)

@@ -312,5 +312,84 @@ async function ready(f) {
   }
 
   log('');
+  log('=== L. Google AND Facebook together ===');
+  {
+    const { w, d } = await ready(await frame('../index.html'));
+    await new Promise(r => setTimeout(r, 900));
+    const host = d.getElementById('reviews-embed');
+
+    w.AHC.apply({ ok: true, tabs: { reviews: [
+      { name: 'Google',     provider: 'iframe', id: 'https://example.com/google',   page: '', sort_order: 1 },
+      { name: 'Facebook',   provider: 'iframe', id: 'https://example.com/facebook', page: '', sort_order: 2 },
+      { name: 'Trustpilot', provider: 'iframe', id: 'https://example.com/trust',    page: '', sort_order: 3 }
+    ] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 300));
+
+    const tabs = host.querySelectorAll('.rev-tabs .tab-btn');
+    const panels = host.querySelectorAll('.rev-panel');
+    chk('a tab per source', tabs.length === 3,
+        [...tabs].map(b => b.textContent).join(' | '));
+    chk('tabs are in sort_order', tabs[0].textContent === 'Google' && tabs[2].textContent === 'Trustpilot');
+    chk('first tab selected', tabs[0].getAttribute('aria-selected') === 'true');
+    chk('only the visible source is loaded', host.querySelectorAll('iframe').length === 1,
+        host.querySelectorAll('iframe').length + ' iframes');
+
+    tabs[1].click();
+    await new Promise(r => setTimeout(r, 250));
+    chk('clicking a tab loads that source', host.querySelectorAll('iframe').length === 2);
+    chk('and shows its panel', !panels[1].hidden && panels[0].hidden);
+    chk('the right embed landed in it',
+        panels[1].querySelector('iframe').src.indexOf('facebook') !== -1,
+        panels[1].querySelector('iframe').src);
+    chk('unvisited source still not loaded', !panels[2].querySelector('iframe'));
+    chk('selection moved', tabs[0].getAttribute('aria-selected') === 'false' &&
+                           tabs[1].getAttribute('aria-selected') === 'true');
+
+    // A single source is a plain embed — a lone tab labels nothing.
+    w.AHC.apply({ ok: true, tabs: { reviews: [
+      { name: 'Google', provider: 'iframe', id: 'https://example.com/only', page: '', sort_order: 1 }
+    ] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 250));
+    chk('one source: no tab strip', !host.querySelector('.rev-tabs'));
+    chk('one source: embedded directly',
+        !!host.querySelector('iframe') && host.querySelector('iframe').src.indexOf('only') !== -1);
+
+    // page scoping
+    host.setAttribute('data-reviews-key', 'services');
+    w.AHC.apply({ ok: true, tabs: { reviews: [
+      { name: 'Everywhere',   provider: 'iframe', id: 'https://example.com/all',      page: '',         sort_order: 1 },
+      { name: 'Services only', provider: 'iframe', id: 'https://example.com/services', page: 'services', sort_order: 2 },
+      { name: 'Other page',   provider: 'iframe', id: 'https://example.com/other',    page: 'visit',    sort_order: 3 }
+    ] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 250));
+    const scoped = [...host.querySelectorAll('.rev-tabs .tab-btn')].map(b => b.textContent);
+    chk('blank page shows everywhere, matching key shows, others do not',
+        scoped.length === 2 && scoped[0] === 'Everywhere' && scoped[1] === 'Services only',
+        scoped.join(' | '));
+    host.removeAttribute('data-reviews-key');
+
+    // a bad row is dropped without taking the good ones with it
+    w.AHC.apply({ ok: true, tabs: { reviews: [
+      { name: 'Good', provider: 'iframe', id: 'https://example.com/good',  page: '', sort_order: 1 },
+      { name: 'Evil', provider: 'iframe', id: 'javascript:alert(1)',       page: '', sort_order: 2 },
+      { name: 'Empty', provider: 'iframe', id: '',                         page: '', sort_order: 3 }
+    ] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 250));
+    chk('javascript: and blank rows dropped, good one kept',
+        !host.querySelector('.rev-tabs') && host.querySelector('iframe').src.indexOf('good') !== -1,
+        host.querySelector('iframe').src);
+
+    // emptying the tab is how the section is turned off
+    w.AHC.apply({ ok: true, tabs: { reviews: [] } });
+    w.AHC_RENDER();
+    await new Promise(r => setTimeout(r, 250));
+    chk('every row inactive hides the whole section', d.getElementById('reviews').hidden);
+  }
+
+  log('');
   log(fails === 0 ? '=== ALL PROVIDER TESTS PASSED ===' : '=== ' + fails + ' FAILED ===');
 })().catch(e => { log(''); log('HARNESS ERROR: ' + e.message); log(e.stack); });

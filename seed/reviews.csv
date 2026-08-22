@@ -1,0 +1,3 @@
+name,provider,id,page,sort_order,active
+Google,jotform,01a00cf8ad38700088a2f53d63cc358f83ae,,1,TRUE
+Facebook,iframe,,,2,FALSE

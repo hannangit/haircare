@@ -126,6 +126,15 @@ const FAQ = [
     a: 'Yes. Any service marked “Kids welcome” is suitable for children.', sort: 6 }
 ];
 
+/* Where the reviews come from. One entry embeds on its own; two or more get a
+   tab strip, and only the visible one loads. The live version comes from the
+   `reviews` tab, so adding Facebook alongside Google is a new row.
+   Leave this empty to fall back to CONFIG.reviewsProvider / reviewsId. */
+const REVIEW_SOURCES = [
+  // { name: 'Google',   provider: 'iframe',  id: 'https://...', page: '', sort: 1 },
+  // { name: 'Facebook', provider: 'iframe',  id: 'https://...', page: '', sort: 2 }
+];
+
 /* Opening hours, in one place so the footer and Find Us page agree. */
 const OPENING_HOURS = [
   { day: 'Monday',    hours: 'Closed' },

@@ -138,69 +138,158 @@
   }
 
   /* ─── Reviews ───────────────────────────────────────────────────────────
-     Configured from the sheet (settings: reviews_provider, reviews_id), so a
-     new site never edits code to change its reviews widget.
+     A salon usually collects reviews in more than one place — Google and
+     Facebook at least — so this takes a LIST, from the sheet's `reviews` tab.
+     One source embeds on its own; two or more get a tab strip, and only the
+     visible one is ever loaded. Three widgets loading at once on the homepage
+     would cost real seconds for two panels nobody has looked at.
 
-     A page that wants its OWN reviews puts data-reviews-key="something" on the
-     embed, and the sheet answers with reviews_id_something. That is how one
-     site shows a different Google or Facebook reviews page per page; without
-     the attribute every page shares the single reviews_id. */
+     `page` on a row scopes it: blank shows everywhere, a value shows only on
+     the page whose embed carries the matching data-reviews-key.
+
+     With no `reviews` tab at all it falls back to the single
+     settings/reviews_provider + reviews_id pair, and then to config.js, so an
+     older sheet keeps working untouched. */
   var lastReviewsKey = null;
 
-  function reviewsFor(host) {
-    var suffix = host.getAttribute('data-reviews-key');
-    var provider = CONFIG.reviewsProvider;
-    var id = CONFIG.reviewsId;
-    if (suffix) {
-      var per = CONFIG.reviewsById && CONFIG.reviewsById[suffix];
-      if (per) {
-        if (per.id) id = per.id;
-        if (per.provider) provider = per.provider;
-      }
+  function sourcesFor(host) {
+    var pageKey = host.getAttribute('data-reviews-key') || '';
+    var list = [];
+
+    if (typeof REVIEW_SOURCES !== 'undefined' && REVIEW_SOURCES && REVIEW_SOURCES.length) {
+      list = REVIEW_SOURCES.filter(function (r) {
+        if (!r || !r.id) return false;
+        return !r.page || r.page === pageKey;
+      });
     }
-    return { provider: String(provider || 'none').toLowerCase(), id: id };
+    if (list.length) return list;
+
+    // A sheet that has the reviews tab and emptied it means "no reviews".
+    // Only a sheet with no reviews tab at all falls through to the old pair.
+    if (CONFIG.reviewsTabPresent) return [];
+
+    // Fallback: the single-widget settings, still supported.
+    var provider = String(CONFIG.reviewsProvider || 'none').toLowerCase();
+    var id = CONFIG.reviewsId;
+    var per = pageKey && CONFIG.reviewsById && CONFIG.reviewsById[pageKey];
+    if (per) {
+      if (per.id) id = per.id;
+      if (per.provider) provider = per.provider;
+    }
+    if (provider === 'none' || !id) return [];
+    return [{ name: 'Reviews', provider: provider, id: id, page: pageKey }];
+  }
+
+  /* Put one embed into one container. Called on first view of a panel, never
+     before — so switching tabs is what triggers the third-party request. */
+  function mountEmbed(el, provider, id) {
+    var p = String(provider || '').toLowerCase();
+    el.innerHTML = '';
+
+    if (p === 'jotform') {
+      el.innerHTML = '<div id="JFWebsiteWidget-' + esc(id) + '"></div>';
+      var s = document.createElement('script');
+      s.src = 'https://www.jotform.com/website-widgets/embed/' + encodeURIComponent(id);
+      s.async = true;
+      el.appendChild(s);
+      return true;
+    }
+    if (p === 'iframe') {
+      if (!/^https?:\/\//i.test(id)) return false;   // same URL whitelist as everywhere
+      el.innerHTML = '<iframe src="' + esc(id) + '" title="Customer reviews" ' +
+        'loading="lazy" style="border:0;width:100%;min-height:420px"></iframe>';
+      return true;
+    }
+    return false;
   }
 
   function renderReviews() {
     var host = document.getElementById('reviews-embed');
     if (!host) return;
-    var cfg = reviewsFor(host);
-    var p = cfg.provider;
-    var id = cfg.id;
 
-    // Re-rendering an unchanged widget would re-inject the third-party script
-    // on every render pass, so nothing happens unless something moved.
-    var key = p + '|' + (id || '');
+    var list = sourcesFor(host);
+
+    // Re-rendering an unchanged set would re-inject the third-party scripts on
+    // every render pass, so nothing happens unless something actually moved.
+    var key = list.map(function (r) {
+      return (r.name || '') + '|' + r.provider + '|' + r.id;
+    }).join('||');
     if (key === lastReviewsKey) return;
     lastReviewsKey = key;
 
-    // Clear first: a rejected or changed provider must not leave the previous
-    // embed sitting there.
-    host.innerHTML = "";
+    host.innerHTML = '';
 
     // Hidden rather than removed: the sheet may still be in flight, and a
     // removed section cannot come back when it lands.
     var section = host.closest('section');
-    if (p === 'none' || !id) {
-      if (section) section.hidden = true;      // no empty heading left behind
+    if (!list.length) {
+      if (section) section.hidden = true;        // no empty heading left behind
       return;
     }
     if (section) section.hidden = false;
 
-    if (p === 'jotform') {
-      host.innerHTML = '<div id="JFWebsiteWidget-' + esc(id) + '"></div>';
-      var s = document.createElement('script');
-      s.src = 'https://www.jotform.com/website-widgets/embed/' + encodeURIComponent(id);
-      s.async = true;
-      host.appendChild(s);
+    if (list.length === 1) {
+      if (!mountEmbed(host, list[0].provider, list[0].id)) host.innerHTML = '';
       return;
     }
 
-    if (p === 'iframe') {
-      if (!/^https?:\/\//i.test(id)) return;     // same URL whitelist as everywhere
-      host.innerHTML = '<iframe src="' + esc(id) + '" title="Customer reviews" ' +
-        'loading="lazy" style="border:0;width:100%;min-height:420px"></iframe>';
-    }
+    var strip = document.createElement('div');
+    strip.className = 'tablist rev-tabs';
+    strip.setAttribute('role', 'tablist');
+    strip.setAttribute('aria-label', 'Where our reviews come from');
+
+    var panels = document.createElement('div');
+    panels.className = 'rev-panels';
+
+    list.forEach(function (src, i) {
+      var uid = 'rev-' + i;
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tab-btn';
+      btn.setAttribute('role', 'tab');
+      btn.id = uid + '-tab';
+      btn.setAttribute('aria-controls', uid);
+      btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+      btn.textContent = src.name || ('Reviews ' + (i + 1));
+      strip.appendChild(btn);
+
+      var panel = document.createElement('div');
+      panel.className = 'rev-panel';
+      panel.id = uid;
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', uid + '-tab');
+      panel.hidden = i !== 0;
+      panels.appendChild(panel);
+
+      function show() {
+        list.forEach(function (_, j) {
+          strip.children[j].setAttribute('aria-selected', String(j === i));
+          panels.children[j].hidden = j !== i;
+        });
+        // Load on first view only.
+        if (!panel.dataset.loaded) {
+          panel.dataset.loaded = '1';
+          mountEmbed(panel, src.provider, src.id);
+        }
+      }
+      btn.addEventListener('click', show);
+      btn.addEventListener('keydown', function (e) {
+        var dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!dir) return;
+        e.preventDefault();
+        var next = strip.children[(i + dir + list.length) % list.length];
+        next.focus();
+        next.click();
+      });
+      if (i === 0) {
+        panel.dataset.loaded = '1';
+        mountEmbed(panel, src.provider, src.id);
+      }
+    });
+
+    host.appendChild(strip);
+    host.appendChild(panels);
   }
 
   function esc(v) {
