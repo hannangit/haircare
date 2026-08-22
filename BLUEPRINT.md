@@ -136,7 +136,11 @@ them:
   in `sort_order`. **Only the visible one loads**; the others load the first
   time someone opens them, so three widgets never cost three page loads.
 - **`provider`** — `iframe` for a normal `https://` embed link (Google,
-  Facebook, Elfsight, Trustpilot), `jotform` for a JotForm widget id.
+  Facebook, Elfsight, Trustpilot), `jotform` for a JotForm widget id. **Leave
+  it blank if unsure** — the value decides. A JotForm website-widget link is
+  recognised as JotForm whatever the cell says, because framing it would show
+  the visitor the widget's JavaScript source instead of reviews. A link
+  ending `.js` is refused outright.
 - **`page`** — blank shows the source on every page. Fill it in to tie a source
   to one page, and put `data-reviews-key="<same word>"` on that page's
   `#reviews-embed`.
@@ -282,7 +286,10 @@ loading spinner anywhere.
    215 · drawer 220 · modal 300. Do not use 9999.
 8. **`image_url` must point at the image file**, not a Drive share page.
    Anything not plainly `http(s)` is dropped before it reaches an `src`.
-9. **Enquire and Book are separate routes** and must stay that way: Enquire
+9. **A JotForm "embed link" is a script, not a page.** Framing it renders
+   30KB of JavaScript source where the reviews should be. providers.js now
+   forces that URL shape to the jotform provider whatever the sheet says.
+10. **Enquire and Book are separate routes** and must stay that way: Enquire
    offers WhatsApp and a phone call, Book offers the scheduler. Section G of
    the provider suite fails if they start offering each other again.
 
@@ -295,7 +302,7 @@ loading spinner anywhere.
 [ ] Deployed as web app, access = Anyone, /exec returns {"ok":true
 [ ] config.js filled in (9 sections)
 [ ] bash build.sh
-[ ] Both test suites pass (142 assertions)
+[ ] Both test suites pass (152 assertions)
 [ ] Chat widget opens, a question answers, WhatsApp handover works
 [ ] Deployed to Pages / Cloudflare
 [ ] Placeholder content replaced (see README checklist)

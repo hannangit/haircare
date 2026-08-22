@@ -391,5 +391,60 @@ async function ready(f) {
   }
 
   log('');
+  log('=== M. A mis-paired reviews cell never shows JavaScript ===');
+  {
+    const { w, d } = await ready(await frame('../index.html'));
+    await new Promise(r => setTimeout(r, 900));
+    const host = d.getElementById('reviews-embed');
+    const JFID = '01a00cf8ad38700088a2f53d63cc358f83ae';
+    const JFURL = 'https://www.jotform.com/website-widgets/embed/' + JFID;
+
+    const set = async (provider, id) => {
+      w.AHC.apply({ ok: true, tabs: { reviews: [
+        { name: 'Google', provider: provider, id: id, page: '', sort_order: 1 }
+      ] } });
+      w.AHC_RENDER();
+      await new Promise(r => setTimeout(r, 300));
+      const ifr = host.querySelector('iframe');
+      return {
+        jotform: !!host.querySelector('[id^=JFWebsiteWidget]'),
+        iframeSrc: ifr ? ifr.src : null,
+        hidden: d.getElementById('reviews').hidden
+      };
+    };
+
+    // The reported bug: a JotForm script URL framed as a page rendered 30KB of
+    // JavaScript source to the customer.
+    let r = await set('iframe', JFURL);
+    chk('jotform URL marked iframe becomes the jotform widget', r.jotform && !r.iframeSrc);
+    chk('  and is never framed', !r.iframeSrc);
+
+    r = await set('jotform', JFID);
+    chk('jotform + bare id still works', r.jotform);
+
+    r = await set('jotform', JFURL);
+    chk('jotform + the URL by mistake works', r.jotform);
+
+    r = await set('', JFID);
+    chk('blank provider + bare id inferred as jotform', r.jotform);
+
+    r = await set('', 'https://example.com/reviews');
+    chk('blank provider + https link inferred as iframe',
+        !!r.iframeSrc && r.iframeSrc.indexOf('example.com') !== -1);
+
+    r = await set('iframe', JFID);
+    chk('iframe + bare id falls back to jotform rather than nothing', r.jotform);
+
+    r = await set('jotfrom', JFID);
+    chk('misspelt provider still resolves from the value', r.jotform);
+
+    r = await set('iframe', 'https://cdn.example.com/widget.js');
+    chk('a .js link is refused, not framed', !r.iframeSrc && r.hidden);
+
+    r = await set('jotform', 'https://example.com/not-a-widget');
+    chk('jotform + an unrelated link is refused', !r.jotform && !r.iframeSrc && r.hidden);
+  }
+
+  log('');
   log(fails === 0 ? '=== ALL PROVIDER TESTS PASSED ===' : '=== ' + fails + ' FAILED ===');
 })().catch(e => { log(''); log('HARNESS ERROR: ' + e.message); log(e.stack); });

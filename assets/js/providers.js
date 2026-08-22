@@ -152,14 +152,61 @@
      older sheet keeps working untouched. */
   var lastReviewsKey = null;
 
+  /* A JotForm website-widget "embed link" is a SCRIPT, not a page. Framing it
+     shows the customer 30KB of JavaScript source instead of reviews — which is
+     an easy mistake, because JotForm hands you a URL and `iframe` is the row
+     that says "paste a link here". So the URL decides, not the cell: this shape
+     always means jotform, and the widget id is taken out of it.
+
+     Everything else is inferred when `provider` is blank, and an obvious
+     mismatch is dropped with a console note rather than rendered. */
+  var JF_EMBED = /^https?:\/\/(?:www\.)?jotform\.com\/website-widgets\/embed\/([A-Za-z0-9_-]+)/i;
+
+  function normaliseSource(provider, id, label) {
+    var p = String(provider || '').toLowerCase();
+    var v = String(id === null || id === undefined ? '' : id).trim();
+    if (!v) return null;
+
+    var jf = JF_EMBED.exec(v);
+    if (jf) return { provider: 'jotform', id: jf[1] };
+
+    var isUrl = /^https?:\/\//i.test(v);
+    if (!p || (p !== 'jotform' && p !== 'iframe' && p !== 'none')) {
+      p = isUrl ? 'iframe' : 'jotform';                 // blank or misspelt
+    }
+    if (p === 'none') return null;
+
+    // jotform wants a bare widget id; some other URL cannot be turned into one.
+    if (p === 'jotform' && isUrl) {
+      warnSource(label, 'is set to jotform but holds a link that is not a JotForm widget');
+      return null;
+    }
+    // Never frame a script: that is what put JavaScript on the page.
+    if (p === 'iframe' && /\.js(\?|#|$)/i.test(v)) {
+      warnSource(label, 'points at a .js script, which cannot be embedded as a page');
+      return null;
+    }
+    // A bare id can only be a JotForm widget id, whatever the cell says. The
+    // value is more trustworthy than the dropdown next to it.
+    if (p === 'iframe' && !isUrl) return { provider: 'jotform', id: v };
+
+    return { provider: p, id: v };
+  }
+
+  function warnSource(label, why) {
+    console.warn('[reviews] ' + (label || 'source') + ' ignored — it ' + why + '.');
+  }
+
   function sourcesFor(host) {
     var pageKey = host.getAttribute('data-reviews-key') || '';
     var list = [];
 
     if (typeof REVIEW_SOURCES !== 'undefined' && REVIEW_SOURCES && REVIEW_SOURCES.length) {
-      list = REVIEW_SOURCES.filter(function (r) {
-        if (!r || !r.id) return false;
-        return !r.page || r.page === pageKey;
+      REVIEW_SOURCES.forEach(function (r) {
+        if (!r || !r.id) return;
+        if (r.page && r.page !== pageKey) return;
+        var n = normaliseSource(r.provider, r.id, 'reviews row "' + (r.name || '') + '"');
+        if (n) list.push({ name: r.name, provider: n.provider, id: n.id, page: r.page });
       });
     }
     if (list.length) return list;
@@ -176,8 +223,9 @@
       if (per.id) id = per.id;
       if (per.provider) provider = per.provider;
     }
-    if (provider === 'none' || !id) return [];
-    return [{ name: 'Reviews', provider: provider, id: id, page: pageKey }];
+    var norm = normaliseSource(provider, id, 'settings reviews_id');
+    if (!norm) return [];
+    return [{ name: 'Reviews', provider: norm.provider, id: norm.id, page: pageKey }];
   }
 
   /* Put one embed into one container. Called on first view of a panel, never
@@ -196,6 +244,7 @@
     }
     if (p === 'iframe') {
       if (!/^https?:\/\//i.test(id)) return false;   // same URL whitelist as everywhere
+      if (/\.js(\?|#|$)/i.test(id)) return false;    // belt and braces: never frame a script
       el.innerHTML = '<iframe src="' + esc(id) + '" title="Customer reviews" ' +
         'loading="lazy" style="border:0;width:100%;min-height:420px"></iframe>';
       return true;

@@ -327,7 +327,9 @@
         var prov = str(r.provider);
         pr.push({
           name: str(r.name) || 'Reviews',
-          provider: (prov ? prov.toLowerCase() : 'iframe'),
+          // Blank stays blank on purpose: providers.js infers from the value
+          // itself, which is more reliable than guessing a default here.
+          provider: (prov ? prov.toLowerCase() : ''),
           id: id,
           page: str(r.page) || '',              // blank = every page
           sort: num(r.sort_order)

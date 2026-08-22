@@ -459,8 +459,8 @@ var SCHEMA = {
     headers: ['name', 'provider', 'id', 'page', 'sort_order', 'active'],
     notes: {
       name: 'The label on the tab, e.g. Google or Facebook. With only one row there is no tab strip and this is not shown.',
-      provider: 'iframe for a normal https:// embed link (Google, Facebook, Elfsight, Trustpilot). jotform for a JotForm website-widget id.',
-      id: 'The embed link, or the JotForm widget id. Must be a plain https:// link or an id - anything else is ignored.',
+      provider: 'iframe for a normal https:// embed link (Google, Facebook, Elfsight, Trustpilot). jotform for a JotForm website-widget id. If you are not sure, leave it BLANK - the site works it out from what you paste.',
+      id: 'The embed link, or the JotForm widget id. A JotForm link is recognised whichever provider you pick. A link ending .js is a script, not a page, and is ignored.',
       page: 'Leave BLANK to show on every page. Fill it in only if this one belongs to a single page, and ask your developer to tag that page with the same word.',
       sort_order: 'Left to right. The first one is the tab that opens.',
       active: 'FALSE hides this source. Set every row FALSE to hide reviews entirely.'
@@ -535,7 +535,7 @@ var INSTRUCTIONS = [
   ['REVIEWS', ''],
   ['', 'Reviews live on their own tab, one row per place you collect them. To show Google AND Facebook, add a row for each and give them names - the site puts a tab above the reviews for each one, and only loads the one being looked at.'],
   ['name', 'The label on the tab: Google, Facebook, Trustpilot. Not shown when there is only one row.'],
-  ['provider', 'iframe for a normal https:// embed link. jotform for a JotForm widget id.'],
+  ['provider', 'iframe for a normal https:// embed link. jotform for a JotForm widget id. Not sure? Leave it blank - the site works it out from what you paste, and a JotForm link is always recognised as JotForm.'],
   ['id', 'The embed link or the widget id.'],
   ['page', 'Blank shows it on every page. Fill it in only to tie a source to one page.'],
   ['', 'To turn reviews off completely, set every row to active = FALSE.'],
